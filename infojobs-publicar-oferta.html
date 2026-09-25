@@ -1,0 +1,2127 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>InfoJobs – Publicar oferta</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --primary:#0B4DD0;--primary-light:#C2E5FF;--primary-container:#D5EDFF;--primary-dark:#001170;
+  --error:#D9382C;--tertiary:#5550F9;
+  --black:#0C0C0C;--dark:#2D3133;--gray-d3:#5E6061;--gray-d2:#797A7A;
+  --gray:#74727E;--gray-l1:#93919A;--gray-l4:#EFEFF1;--gray-999:#999;
+  --white:#fff;--bg:#F4F4F4;--pink:#E11982;
+}
+body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text','Helvetica Neue',Arial,sans-serif;background:var(--bg);color:var(--black);min-height:100vh;font-size:16px}
+
+/* HEADER */
+.header{background:#fff;height:48px;display:flex;align-items:center;justify-content:center;box-shadow:0 1px 0.5px rgba(0,0,0,.24);position:sticky;top:0;z-index:100}
+.logo{font-size:21px;font-weight:800;color:var(--primary);letter-spacing:-.3px}
+.logo em{color:var(--dark);font-style:normal}
+
+/* LAYOUT */
+.main{max-width:980px;margin:0 auto;padding:40px 20px 120px;display:flex;flex-direction:column;gap:40px}
+
+/* PROGRESS */
+.progress{display:flex;align-items:flex-start;justify-content:center}
+.step{display:flex;flex-direction:column;align-items:center;gap:10px;width:80px;flex-shrink:0}
+.step-num{width:24px;height:24px;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:700;line-height:1;color:var(--dark)}
+.step.active .step-num{color:var(--primary)}
+.step.done .step-num{display:none}
+.step-check{display:none;width:24px;height:24px;background:var(--primary);border-radius:50%}
+.step-check::after{content:'';display:block;width:10px;height:6px;border-left:2.5px solid #fff;border-bottom:2.5px solid #fff;transform:rotate(-45deg) translate(7px,9px)}
+.step.done .step-check{display:block}
+.step-label{font-size:14px;color:var(--gray-d2);letter-spacing:-.09px;text-align:center;white-space:nowrap}
+.step-line{flex:1;height:8px;margin-top:8px;border-radius:4px;min-width:60px;background:var(--gray-l1)}
+.step-line.done{background:var(--primary)}
+
+/* HEADING */
+.page-heading{text-align:center}
+.page-heading h1{font-size:28px;font-weight:600;line-height:34px;letter-spacing:.36px;margin-bottom:8px}
+.page-heading p{font-size:16px;color:var(--gray-d3);line-height:20px;letter-spacing:.2px}
+
+/* PANELS */
+.panel{display:none;flex-direction:column;gap:40px}
+.panel.active{display:flex;animation:fadein .2s ease}
+@keyframes fadein{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+
+/* FIELDSET */
+.fieldset{display:flex;flex-direction:column;gap:16px}
+.fs-title{font-size:16px;font-weight:600;color:var(--black);letter-spacing:.25px;line-height:20px}
+.fs-title span{font-weight:400;color:var(--gray)}
+
+/* CARD */
+.card{background:#fff;border-radius:6px;padding:40px 24px;display:flex;flex-direction:column;gap:24px}
+
+/* FORM FIELD */
+.ff{display:flex;flex-direction:column;gap:4px}
+.ff label,.ff .lbl{font-size:14px;color:var(--black);line-height:16px}
+.ff label .opt{color:var(--gray)}
+.ff input,.ff select,.ff textarea{
+  height:40px;border:1px solid var(--gray-l1);border-radius:8px;padding:0 12px;
+  font-size:16px;color:var(--black);background:#fff;font-family:inherit;
+  line-height:20px;outline:none;transition:border-color .15s;width:100%;
+  -webkit-appearance:none;appearance:none
+}
+.ff input:disabled,.ff select:disabled{background:var(--gray-l4);color:var(--gray);cursor:not-allowed}
+.ff input:focus,.ff select:focus,.ff textarea:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(11,77,208,.1)}
+.ff select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24'%3E%3Cpath d='M7 10l5 5 5-5z' fill='%2374727E'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 6px center;padding-right:34px}
+.ff textarea{height:126px;padding:10px 12px;resize:vertical;line-height:19px}
+.ff .hint{font-size:12px;color:var(--gray);line-height:14px}
+.ff .hint.right{text-align:right}
+
+/* ROW */
+.row{display:flex;gap:16px}
+.row .ff{flex:1;min-width:0}
+.row .ff.w135{flex:0 0 135px}
+.row .ff.w208{flex:0 0 208px}
+
+/* SUBTITLE */
+.subtitle{font-size:16px;color:var(--black);line-height:20px}
+
+/* CHECKBOX */
+.cbx{display:flex;gap:8px;align-items:flex-start;cursor:pointer}
+.cbx input[type=checkbox]{width:16px;height:16px;min-width:16px;border:1.5px solid var(--gray-l1);border-radius:4px;appearance:none;-webkit-appearance:none;cursor:pointer;margin-top:2px;background:#fff;position:relative;flex-shrink:0}
+.cbx input[type=checkbox]:checked{background:var(--primary);border-color:var(--primary)}
+.cbx input[type=checkbox]:checked::after{content:'';position:absolute;inset:0;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M3 8l3.5 3.5L13 5' stroke='white' stroke-width='2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E") center/contain no-repeat}
+.cbx-label{font-size:16px;color:var(--black);line-height:20px}
+.cbx-label .price{color:var(--pink)}
+.cbx-label .lnk{color:var(--primary);font-size:14px}
+
+/* AI BUTTON */
+.ai-btn{display:inline-flex;align-items:center;gap:8px;padding:8px 16px;border:1.5px dashed var(--tertiary);border-radius:40px;background:#fff;cursor:pointer;color:var(--tertiary);font-size:14px;letter-spacing:.1px;font-family:inherit;transition:background .15s}
+.ai-btn:hover{background:rgba(85,80,249,.05)}
+
+/* BUTTON GROUP */
+.btn-grp{display:flex}
+.btn-grp button{height:40px;padding:0 16px;border:1px solid var(--primary);background:#fff;color:var(--primary);font-size:14px;font-weight:600;font-family:inherit;cursor:pointer;transition:background .15s;min-width:60px}
+.btn-grp button:first-child{border-radius:8px 0 0 8px}
+.btn-grp button:last-child{border-radius:0 8px 8px 0}
+.btn-grp button:not(:first-child){margin-left:-1px}
+.btn-grp button.active{background:var(--primary-light);z-index:1}
+.btn-grp button:hover:not(.active){background:rgba(11,77,208,.05)}
+
+/* TAGS INPUT */
+.tags-wrap{min-height:40px;border:1px solid var(--gray-l1);border-radius:8px;padding:8px 12px;display:flex;flex-wrap:wrap;gap:8px;align-items:center;background:#fff;cursor:text}
+.tags-wrap:focus-within{border-color:var(--primary);box-shadow:0 0 0 3px rgba(11,77,208,.1)}
+.tag{display:inline-flex;align-items:center;gap:4px;background:var(--gray-l4);border-radius:20px;padding:0 8px;height:24px;font-size:12px;color:var(--black)}
+.tag-x{width:14px;height:14px;background:none;border:none;cursor:pointer;color:var(--gray);font-size:13px;line-height:1;display:flex;align-items:center;justify-content:center;border-radius:50%;padding:0}
+.tag-x:hover{background:var(--gray-l1)}
+.tag-input{flex:1;min-width:80px;border:none;outline:none;font-size:16px;font-family:inherit;color:var(--black);background:transparent}
+
+/* SUGGESTED */
+.sugg-list{display:flex;flex-wrap:wrap;gap:8px;margin-top:4px}
+.tag-add{display:inline-flex;align-items:center;gap:4px;height:24px;padding:0 8px;border:1px solid var(--primary);border-radius:24px;background:#fff;color:var(--primary);font-size:12px;cursor:pointer;font-family:inherit;transition:background .15s}
+.tag-add:hover{background:rgba(11,77,208,.05)}
+
+/* LANG TAGS */
+.lang-tags{display:flex;flex-wrap:wrap;gap:8px;margin-top:4px}
+.lang-tag{display:inline-flex;align-items:center;gap:6px;background:var(--gray-l4);border-radius:20px;padding:4px 8px 4px 12px;font-size:14px;color:var(--black)}
+.lang-tag button{background:none;border:none;cursor:pointer;color:var(--gray);font-size:17px;line-height:1;padding:0;display:flex;align-items:center}
+
+/* ADD BUTTON */
+.add-btn{display:inline-flex;align-items:center;gap:8px;height:40px;padding:0 16px;border:1px solid var(--primary);border-radius:24px;background:#fff;color:var(--primary);font-size:16px;font-weight:600;cursor:pointer;font-family:inherit;transition:background .15s}
+.add-btn:hover{background:rgba(11,77,208,.05)}
+
+/* NOTIFICATION */
+.notif{background:var(--primary-container);border-radius:4px;padding:16px;display:flex;gap:12px;align-items:flex-start}
+.notif-icon{font-size:18px;color:var(--primary-dark);flex-shrink:0;margin-top:2px}
+.notif p{font-size:15px;color:var(--primary-dark);line-height:21px}
+
+/* TOGGLE */
+.filter-row{background:#fff;border-radius:8px;box-shadow:0 1px 2px rgba(0,0,0,.24);padding:16px;display:flex;align-items:center;gap:12px}
+.filter-row p{flex:1;font-size:16px;color:var(--dark);line-height:20px;letter-spacing:.2px}
+.toggle{width:40px;height:24px;background:var(--gray-l1);border-radius:16px;border:1px solid var(--gray-l1);position:relative;cursor:pointer;flex-shrink:0;transition:background .2s,border-color .2s}
+.toggle.on{background:var(--primary);border-color:var(--primary)}
+.toggle-knob{position:absolute;top:1px;left:1px;width:20px;height:20px;background:#fff;border-radius:50%;box-shadow:0 0 1.5px rgba(0,0,0,.2);transition:transform .2s}
+.toggle.on .toggle-knob{transform:translateX(16px)}
+
+/* QUESTIONS */
+.q-card{background:#fff;border:1px solid var(--gray-l4);border-radius:8px;padding:16px;display:flex;flex-direction:column;gap:12px}
+.q-head{display:flex;align-items:center;justify-content:space-between}
+.q-num{font-size:13px;font-weight:600;color:var(--gray)}
+.q-del{width:28px;height:28px;background:none;border:none;cursor:pointer;color:var(--gray);font-size:20px;display:flex;align-items:center;justify-content:center;border-radius:6px}
+.q-del:hover{background:var(--gray-l4)}
+.q-options{display:flex;flex-direction:column;gap:8px;margin-top:4px}
+.q-opt{display:flex;align-items:center;gap:8px}
+.q-opt input{flex:1;height:36px;border:1px solid var(--gray-l1);border-radius:8px;padding:0 10px;font-size:14px;font-family:inherit;outline:none;color:var(--black)}
+.q-opt input:focus{border-color:var(--primary)}
+.q-opt-del{background:none;border:none;cursor:pointer;color:var(--gray);font-size:18px;line-height:1;padding:2px 4px;border-radius:4px}
+.q-opt-del:hover{background:var(--gray-l4)}
+.add-opt-btn{background:none;border:none;color:var(--primary);font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;padding:4px 8px;border-radius:4px;display:flex;align-items:center;gap:4px;margin-top:4px}
+.add-opt-btn:hover{background:rgba(11,77,208,.05)}
+.add-q-btn{width:100%;height:40px;border:1.5px dashed var(--primary);border-radius:8px;background:#fff;color:var(--primary);font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:8px;transition:background .15s}
+.add-q-btn:hover{background:rgba(11,77,208,.05)}
+
+/* SCREENING HEADER */
+.scr-hd{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:16px}
+.scr-hd-left{display:flex;flex-direction:column;gap:4px}
+.scr-icon{display:inline-flex;align-items:center;gap:10px}
+.check-circle{width:24px;height:24px;background:var(--primary);border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.check-circle svg{display:block}
+.hamburger{width:24px;height:24px;border:2px solid var(--gray-l1);border-radius:4px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;flex-shrink:0}
+.hamburger span{display:block;width:12px;height:1.5px;background:var(--gray)}
+
+/* BOTTOM NAV */
+.bottom-nav{display:flex;align-items:center;justify-content:space-between;padding-top:24px;border-top:1px solid var(--gray-l4);margin-top:8px}
+.bnav-r{display:flex;gap:16px;align-items:center}
+.btn{height:40px;padding:0 20px;border-radius:20px;font-size:14px;font-weight:600;font-family:inherit;cursor:pointer;border:none;display:inline-flex;align-items:center;justify-content:center;gap:4px;min-width:108px;transition:opacity .15s,background .15s;white-space:nowrap}
+.btn:disabled{opacity:.35;cursor:not-allowed}
+.btn-err{background:none;color:var(--error)}
+.btn-err:hover:not(:disabled){background:rgba(217,56,44,.05)}
+.btn-ghost{background:none;color:var(--primary)}
+.btn-ghost:hover{background:rgba(11,77,208,.05)}
+.btn-outline{background:none;color:var(--primary);border:1px solid var(--primary);border-radius:48px}
+.btn-outline:hover:not(:disabled){background:rgba(11,77,208,.05)}
+.btn-primary{background:var(--primary);color:#fff}
+.btn-primary:hover:not(:disabled){background:#0940b8}
+
+/* TOAST */
+.toast{position:fixed;bottom:32px;left:50%;transform:translateX(-50%) translateY(60px);background:var(--dark);color:#fff;padding:14px 24px;border-radius:8px;font-size:14px;opacity:0;transition:all .3s;z-index:200;white-space:nowrap}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* ── LISTADO DE OFERTAS ── */
+#listado{display:none}
+#listado.active{display:block}
+
+.nav-header{background:#fff;height:80px;display:flex;align-items:center;padding:0 40px;box-shadow:0 1px 0.5px rgba(0,0,0,.18);gap:40px;position:sticky;top:0;z-index:100}
+.nav-logo{font-size:21px;font-weight:800;color:var(--primary);letter-spacing:-.3px;white-space:nowrap;margin-left:-40px;align-self:stretch;display:flex;align-items:stretch}
+.nav-logo img{height:100%;width:auto;display:block}
+.nav-logo em{color:var(--dark);font-style:normal}
+.nav-links{display:flex;gap:4px;flex:1}
+.nav-link{padding:8px 16px;border-radius:8px;font-size:15px;color:var(--dark);text-decoration:none;transition:background .15s;white-space:nowrap;font-weight:400}
+.nav-link:hover{background:var(--gray-l4)}
+.nav-link.active{color:var(--primary);font-weight:400}
+.nav-right{display:flex;align-items:center;gap:12px;margin-left:auto}
+.nav-avatar{width:40px;height:40px;border-radius:50%;background:var(--primary-light);border:2px solid var(--primary-light);overflow:hidden;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;color:var(--primary);cursor:pointer}
+.nav-publish-btn{height:40px;padding:0 20px;background:var(--primary);color:#fff;border:none;border-radius:20px;font-size:14px;font-weight:600;font-family:inherit;cursor:pointer;white-space:nowrap}
+.nav-publish-btn:hover{background:#0940b8}
+
+.listado-wrap{max-width:1440px;margin:0 auto;padding:40px 80px 80px}
+.listado-heading{display:flex;align-items:center;justify-content:space-between;margin-bottom:32px;gap:24px;flex-wrap:wrap}
+.listado-heading h1{font-size:28px;font-weight:600;color:var(--black);letter-spacing:.36px;white-space:nowrap}
+.listado-search{display:flex;gap:12px;flex:1;max-width:800px;justify-content:flex-end}
+.listado-search input,.listado-search select{height:40px;border:1px solid var(--gray-l1);border-radius:8px;padding:0 12px;font-size:15px;font-family:inherit;color:var(--black);outline:none;background:#fff;-webkit-appearance:none;appearance:none}
+.listado-search input{width:280px}
+.listado-search select{width:200px;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24'%3E%3Cpath d='M7 10l5 5 5-5z' fill='%2374727E'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 6px center;padding-right:34px}
+.listado-search input:focus,.listado-search select:focus{border-color:var(--primary)}
+
+.tabs{display:flex;gap:0;border-bottom:2px solid var(--gray-l4);margin-bottom:24px}
+.tab{padding:10px 20px;font-size:15px;font-weight:400;color:var(--gray);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;transition:color .15s,border-color .15s;user-select:none}
+.tab:hover{color:var(--dark)}
+.tab.active{color:var(--primary);font-weight:400;border-bottom-color:var(--primary)}
+
+.list-toolbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;padding:0 4px}
+.list-toolbar-left{display:flex;align-items:center;gap:16px}
+.toolbar-label{font-size:14px;color:var(--gray)}
+.sort-btn{display:flex;align-items:center;gap:6px;font-size:14px;color:var(--dark);font-weight:500;background:none;border:none;cursor:pointer;font-family:inherit;padding:6px 10px;border-radius:6px}
+.sort-btn:hover{background:var(--gray-l4)}
+
+.offer-list{display:flex;flex-direction:column;gap:0}
+
+.offer-card{background:#fff;border-radius:16px;padding:24px;display:flex;flex-direction:column;gap:24px;margin-bottom:8px;border:2px solid transparent;transition:border-color .2s,box-shadow .2s}
+.offer-card:hover{box-shadow:0 2px 12px rgba(0,0,0,.08)}
+.offer-card.new-offer{border-color:transparent}
+
+.offer-top{display:flex;align-items:flex-start;gap:16px}
+.offer-cb{width:20px;height:20px;min-width:20px;border:1.5px solid var(--gray-l1);border-radius:4px;cursor:pointer;margin-top:4px;appearance:none;-webkit-appearance:none;background:#fff}
+.offer-cb:checked{background:var(--primary);border-color:var(--primary)}
+.offer-main{flex:1;min-width:0;display:flex;align-items:flex-start;justify-content:space-between;gap:32px}
+.offer-details{flex:1;min-width:0;display:flex;flex-direction:column;gap:12px}
+.offer-labels{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.badge-open{display:inline-flex;align-items:center;gap:4px;font-size:12px;color:#378701;font-weight:500}
+.badge-open::before{content:'●';font-size:10px}
+.badge-pill{display:inline-flex;align-items:center;gap:4px;background:var(--primary-light);color:var(--primary-dark);font-size:12px;padding:2px 6px;border-radius:4px;font-weight:500}
+.badge-new{background:#FFF3CD;color:#856404;border:1px solid #FFEAA7}
+.offer-title{font-size:24px;font-weight:600;color:var(--primary);line-height:28px;letter-spacing:.35px;text-decoration:none;cursor:pointer}
+.offer-title:hover{text-decoration:underline}
+.offer-meta{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.offer-meta-item{display:flex;align-items:center;gap:5px;font-size:14px;color:var(--dark);line-height:16px;letter-spacing:.1px}
+.offer-meta-icon{width:16px;height:16px;flex-shrink:0;opacity:.7}
+.meta-divider{width:1px;height:12px;background:rgba(12,12,12,.2)}
+
+.offer-actions{display:flex;align-items:center;gap:12px;flex-shrink:0}
+.offer-cands{display:flex;align-items:center;gap:5px;font-size:18px;font-weight:600;color:var(--black)}
+.offer-cands svg{width:16px;height:16px;flex-shrink:0}
+.offer-more{width:48px;height:48px;background:none;border:none;border-radius:8px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:22px;color:var(--gray);transition:background .15s}
+.offer-more:hover{background:var(--gray-l4)}
+
+.offer-counters{display:flex;gap:32px;align-items:flex-end;padding-top:0}
+.counter-item{display:flex;flex-direction:column;align-items:center;gap:4px;min-width:80px;cursor:pointer;border-radius:8px;padding:8px 12px;transition:background .15s}
+.counter-item:hover{background:var(--gray-l4)}
+.counter-num{font-size:18px;font-weight:600;color:var(--gray);line-height:22px;letter-spacing:.25px}
+.counter-num.highlight{color:var(--primary)}
+.counter-label{font-size:14px;font-weight:600;color:var(--gray);line-height:20px;white-space:nowrap}
+
+.pagination{display:flex;align-items:center;justify-content:center;gap:4px;padding:32px 0 0}
+.page-btn{width:40px;height:40px;border:none;border-radius:8px;background:none;font-size:15px;font-family:inherit;cursor:pointer;color:var(--dark);display:flex;align-items:center;justify-content:center;transition:background .15s}
+.page-btn:hover{background:var(--gray-l4)}
+.page-btn.active{background:var(--primary);color:#fff}
+.page-btn:disabled{opacity:.35;cursor:not-allowed}
+
+.new-offer-banner{background:var(--primary-container);border:1px solid #A8D4F5;border-radius:12px;padding:16px 20px;display:flex;align-items:center;gap:12px;margin-bottom:16px;animation:fadeIn .4s ease}
+.new-offer-banner p{font-size:15px;color:var(--primary-dark);flex:1;line-height:20px}
+.new-offer-banner button{background:none;border:none;font-size:20px;color:var(--gray);cursor:pointer;line-height:1}
+
+/* ── INSCRITOS PAGE ── */
+#inscritos-page{display:none;background:#F4F4F4;min-height:100vh}
+#inscritos-page.active{display:block}
+
+.ins-header-wrap{background:#fff;border-bottom:1px solid #EFEFF1}
+.ins-back{display:inline-flex;align-items:center;gap:6px;font-size:13px;color:#0B4DD0;font-weight:500;text-decoration:none;padding:16px 40px 0;cursor:pointer;line-height:1}
+.ins-back:hover{text-decoration:underline}
+.ins-top-row{display:flex;align-items:flex-start;justify-content:space-between;padding:8px 40px 0}
+.ins-title-group h1{font-size:26px;font-weight:700;color:#0C0C0C;letter-spacing:-.3px;line-height:32px;display:flex;align-items:center;gap:8px}
+.ins-title-group h1 .more-btn{background:none;border:none;font-size:18px;color:#74727E;cursor:pointer;padding:2px 6px;border-radius:4px}
+.ins-title-group h1 .more-btn:hover{background:#EFEFF1}
+.ins-meta-line{font-size:13px;color:#74727E;margin-top:2px}
+.ins-stats-row{display:flex;align-items:center;gap:20px;padding-top:6px}
+.ins-stat{display:flex;align-items:center;gap:5px;font-size:14px;color:#2D3133}
+.ins-stat svg{width:15px;height:15px;flex-shrink:0;color:#74727E}
+.mas-info-lnk{font-size:13px;color:#0B4DD0;font-weight:500;cursor:pointer;text-decoration:none}
+.mas-info-lnk:hover{text-decoration:underline}
+
+.preva-banner{display:flex;align-items:center;gap:12px;background:#EBF5FF;border-top:1px solid #90CAF9;border-bottom:1px solid #90CAF9;padding:12px 40px;margin:0}
+.preva-banner-text{font-size:13px;color:#003B7A;line-height:20px;flex:1}
+.preva-banner-text strong{font-weight:600}
+.preva-banner-text a{color:#0B4DD0;font-weight:600;text-decoration:underline;cursor:pointer}
+.preva-banner-icon{font-size:14px;flex-shrink:0}
+.preva-activate-btn{flex-shrink:0;display:inline-flex;align-items:center;gap:6px;padding:8px 18px;background:#0B4DD0;color:#fff;border:none;border-radius:20px;font-size:13px;font-weight:600;font-family:inherit;cursor:pointer;white-space:nowrap}
+.preva-activate-btn:hover{background:#0940B8}
+
+.ins-tabs-bar{background:#fff;display:flex;gap:0;border-bottom:2px solid #EFEFF1;padding:0 40px}
+.ins-tab{padding:10px 18px;font-size:14px;font-weight:500;color:#74727E;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;white-space:nowrap;user-select:none;transition:color .15s}
+.ins-tab:hover{color:#2D3133}
+.ins-tab.active{color:#0B4DD0;font-weight:600;border-bottom-color:#0B4DD0}
+
+.ins-content{display:flex;gap:20px;padding:20px 40px;align-items:flex-start}
+
+.ins-sidebar{width:220px;flex-shrink:0;background:#fff;border-radius:8px;padding:16px;display:flex;flex-direction:column;gap:16px}
+.sidebar-header{display:flex;align-items:center;justify-content:space-between;font-size:15px;font-weight:600;color:#0C0C0C}
+.sidebar-collapse{background:none;border:none;cursor:pointer;font-size:13px;color:#74727E;padding:2px}
+.sb-field-label{font-size:13px;font-weight:600;color:#0C0C0C;margin-bottom:6px;display:flex;align-items:center;gap:4px}
+.sb-info-icon{font-size:11px;color:#74727E;cursor:pointer}
+.sb-search{width:100%;height:32px;border:1px solid #CDCDD0;border-radius:6px;padding:0 10px;font-size:13px;font-family:inherit;box-sizing:border-box;color:#0C0C0C}
+.sb-search:focus{outline:none;border-color:#0B4DD0}
+.sb-toggle-row{display:flex;align-items:center;justify-content:space-between;font-size:13px;color:#2D3133;gap:8px}
+.sb-toggle{position:relative;width:34px;height:18px;flex-shrink:0}
+.sb-toggle input{opacity:0;width:0;height:0}
+.sb-toggle-slider{position:absolute;inset:0;background:#CDCDD0;border-radius:9px;cursor:pointer;transition:.2s}
+.sb-toggle-slider:before{content:'';position:absolute;width:14px;height:14px;left:2px;top:2px;background:#fff;border-radius:50%;transition:.2s}
+.sb-toggle input:checked+.sb-toggle-slider{background:#0B4DD0}
+.sb-toggle input:checked+.sb-toggle-slider:before{transform:translateX(16px)}
+.sb-divider{height:1px;background:#EFEFF1;margin:0 -16px}
+.sb-section-title{font-size:13px;font-weight:600;color:#0C0C0C;margin-bottom:8px}
+.sb-range-label{font-size:12px;color:#5E6061;margin-bottom:4px}
+.sb-range{width:100%;accent-color:#0B4DD0;cursor:pointer;margin-bottom:10px}
+.sb-ticks{display:flex;justify-content:space-between;font-size:11px;color:#93919A;margin-top:-8px;margin-bottom:8px}
+.sb-sub-label{font-size:12px;font-weight:600;color:#5E6061;text-transform:uppercase;letter-spacing:.5px;margin:8px 0 6px}
+.sb-check{display:flex;align-items:center;gap:7px;font-size:13px;color:#2D3133;cursor:pointer;margin-bottom:5px;line-height:16px}
+.sb-check input[type=checkbox]{width:14px;height:14px;min-width:14px;accent-color:#0B4DD0;cursor:pointer}
+.sb-more{font-size:13px;color:#0B4DD0;font-weight:500;cursor:pointer;margin-top:2px}
+.sb-more:hover{text-decoration:underline}
+.score-pills{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:8px}
+.score-pill{padding:3px 11px;border-radius:14px;font-size:12px;font-weight:600;cursor:pointer;border:1.5px solid transparent;user-select:none}
+.score-pill.todas{background:#0B4DD0;color:#fff;border-color:#0B4DD0}
+.score-pill.alta{background:#E8F5E9;color:#2E7D32;border-color:#A5D6A7}
+.score-pill.media{background:#FFF8E1;color:#F57F17;border-color:#FFE082}
+.score-pill.baja{background:#FFEBEE;color:#C62828;border-color:#FFCDD2}
+
+.ins-main{flex:1;min-width:0}
+.table-bar{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;gap:12px}
+.table-bar-left{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.cvs-count{font-size:13px;color:#74727E}
+.tbar-btn{background:none;border:none;font-family:inherit;font-size:13px;color:#0B4DD0;font-weight:500;cursor:pointer;display:inline-flex;align-items:center;gap:5px;padding:0}
+.tbar-btn:hover{text-decoration:underline}
+.tbar-btn svg{width:14px;height:14px}
+.table-bar-right{display:flex;align-items:center;gap:8px;flex-shrink:0}
+.show-label{font-size:13px;color:#74727E}
+.show-sel{height:30px;border:1px solid #CDCDD0;border-radius:6px;padding:0 8px;font-size:13px;font-family:inherit;color:#2D3133}
+.view-btn{width:30px;height:30px;border:1px solid #CDCDD0;border-radius:6px;background:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#74727E;font-size:15px}
+.view-btn.on{background:#0B4DD0;color:#fff;border-color:#0B4DD0}
+
+.cand-table{width:100%;border-collapse:separate;border-spacing:0;background:#fff;border-radius:8px;overflow:hidden}
+.cand-table th{font-size:12px;font-weight:600;color:#5E6061;text-align:left;padding:10px 12px;border-bottom:1.5px solid #EFEFF1;white-space:nowrap;background:#fff}
+.cand-table th:first-child{width:24px;padding:10px 8px 10px 16px}
+.cand-table td{padding:12px;border-bottom:1px solid #EFEFF1;vertical-align:top;background:#fff;font-size:13px}
+.cand-table td:first-child{padding:12px 8px 12px 16px}
+.cand-row:last-child td{border-bottom:none}
+.cand-row:hover td{background:#F8FAFF}
+.cand-row.hl-row:hover td{background:#EDF3FF}
+.cand-name-link{font-size:14px;font-weight:600;color:#0B4DD0;cursor:pointer;line-height:18px}
+.cand-name-link:hover{text-decoration:underline}
+.cand-job-title{font-size:12px;color:#74727E;margin-top:2px;line-height:16px}
+.cand-tag-row{display:flex;gap:4px;flex-wrap:wrap;margin-top:5px}
+.cand-tag-chip{font-size:11px;padding:2px 7px;border-radius:4px;background:#EFEFF1;color:#2D3133;font-weight:400}
+.cand-time{font-size:12px;color:#93919A;white-space:nowrap}
+.cand-loc-main{font-size:13px;color:#2D3133}
+.cand-loc-sub{font-size:12px;color:#93919A}
+.nota-badge{display:inline-block;font-size:12px;font-weight:700;padding:3px 8px;border-radius:4px;white-space:nowrap}
+.nota-verde{background:#E8F5E9;color:#2E7D32}
+.nota-naranja{background:#FFF3E0;color:#E65100}
+.nota-roja{background:#FFEBEE;color:#C62828}
+.ajuste-val{font-size:20px;font-weight:700;line-height:1;display:block}
+.ajuste-val.alto{color:#2E7D32}
+.ajuste-val.medio{color:#FF8F00}
+.ajuste-val.bajo{color:#E53935}
+.ajuste-label-small{font-size:11px;color:#93919A;display:block;margin-top:2px}
+.hl-expand-td{padding:0!important;border-bottom:1px solid #EFEFF1}
+.hl-expand-inner{background:#F8FAFF;padding:10px 16px 14px 48px;display:flex;gap:24px}
+.hl-col{flex:1;min-width:0}
+.hl-col-title{font-size:11px;font-weight:600;color:#74727E;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px}
+.hl-bullet{display:flex;align-items:flex-start;gap:6px;font-size:12px;color:#2D3133;margin-bottom:5px;line-height:16px}
+.hl-bullet::before{content:'•';color:#0B4DD0;flex-shrink:0;font-size:14px;line-height:14px}
+.hl-crit-item{display:flex;align-items:center;gap:6px;font-size:12px;color:#2D3133;margin-bottom:5px}
+.hl-ok{color:#2E7D32;font-size:14px;font-weight:700;flex-shrink:0}
+.hl-ko{color:#E53935;font-size:14px;font-weight:700;flex-shrink:0}
+.ophs-badge{display:inline-flex;align-items:center;gap:4px;background:#EAF2FF;color:#0B4DD0;font-size:11px;font-weight:600;padding:2px 8px;border-radius:4px;margin-bottom:4px}
+.skel{display:inline-block;background:linear-gradient(90deg,#E8E8E8 25%,#F5F5F5 50%,#E8E8E8 75%);background-size:400% 100%;animation:shimmer 1.4s ease-in-out infinite;border-radius:4px}
+@keyframes shimmer{0%{background-position:100% 0}100%{background-position:-100% 0}}
+.skel-circle{border-radius:50%!important}
+.hl-expand-skel{background:#F8FAFF;padding:10px 16px 14px 48px;display:flex;gap:24px}
+.hl-grid-header{display:grid;grid-template-columns:30px minmax(180px,2fr) 90px 160px 110px 130px 120px;padding:8px 16px;border-bottom:2px solid #EFEFF1;gap:0}
+.hl-grid-header>div{font-size:11px;font-weight:600;color:#74727E;padding:0 8px}
+.hl-grid-header>div:first-child{padding:0 4px}
+.hl-cand-card,.cand-card{background:#fff;border:1px solid #EFEFF1;border-radius:16px;margin-bottom:8px;overflow:hidden}
+.hl-cand-row{display:grid;grid-template-columns:30px minmax(180px,2fr) 90px 160px 110px 130px 120px;padding:12px 16px;gap:0;align-items:start}
+.hl-cand-row>div{padding:0 8px;font-size:13px;color:#2D3133}
+.hl-cand-row>div:first-child{padding:0 4px;padding-top:2px}
+.hl-eval-section{padding:0 16px 12px 16px}
+.skel-col{flex:1;display:flex;flex-direction:column;gap:7px}
+
+/* ── HIGHLIGHTS MODAL ── */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:400;display:flex;align-items:flex-start;justify-content:center;padding-top:60px;overflow-y:auto}
+.modal-overlay.hidden{display:none}
+.hl-modal{background:#fff;border-radius:12px;width:800px;max-width:95vw;max-height:80vh;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 24px 64px rgba(0,0,0,.3)}
+.hl-modal-header{padding:20px 24px 16px;border-bottom:1px solid #EFEFF1;flex-shrink:0}
+.hl-modal-header h2{font-size:17px;font-weight:700;color:#0C0C0C;line-height:24px}
+.hl-modal-body{padding:20px 24px;overflow-y:auto;flex:1}
+.hl-info-box{background:rgba(215,220,255,0.4);border-radius:8px;padding:14px 16px;margin-bottom:18px}
+.hl-info-box-title{font-size:14px;font-weight:700;color:#200766;margin-bottom:4px;display:flex;align-items:center;gap:8px;justify-content:space-between}
+.hl-info-box-title .ia-chip{background:#fff;color:#6950F9;font-size:10px;font-weight:700;padding:2px 6px;border-radius:3px}
+.hl-info-box p{font-size:13px;color:#200766;line-height:18px}
+.hl-section-title{font-size:14px;font-weight:700;color:#0C0C0C;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between}
+.add-req-link{font-size:13px;color:#0B4DD0;font-weight:400;background:none;border:none;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:3px;flex-shrink:0}
+.hl-warn{background:#FFFDE7;border-radius:6px;padding:10px 12px;margin-bottom:14px;display:flex;align-items:flex-start;gap:8px;font-size:12px;color:#4E342E;line-height:17px}
+.hl-warn-close{background:none;border:none;cursor:pointer;font-size:16px;color:#74727E;padding:0;margin-left:auto;flex-shrink:0;line-height:1}
+.req-list{display:flex;flex-direction:column;gap:8px;margin-bottom:18px}
+.req-item{display:flex;flex-direction:column;gap:6px;margin-bottom:8px}
+.req-input-row{display:flex;align-items:center;gap:8px}
+.req-text{flex:1;border:1px solid #CDCDD0;border-radius:8px;padding:9px 12px;outline:none;font-size:13px;font-family:inherit;color:#0C0C0C;background:#fff;transition:border-color .15s}
+.req-text:focus{border-color:#0B4DD0;box-shadow:0 0 0 3px rgba(11,77,208,.1)}
+.req-radios{display:flex;gap:16px;padding-left:2px}
+.req-radio{display:flex;align-items:center;gap:4px;font-size:12px;color:#2D3133;cursor:pointer;white-space:nowrap}
+.req-radio input{accent-color:#0B4DD0;cursor:pointer;width:13px;height:13px}
+.req-del-btn{background:none;border:none;cursor:pointer;color:#93919A;font-size:16px;padding:2px;border-radius:4px;flex-shrink:0;line-height:1}
+.req-del-btn:hover{color:#D9382C;background:#FFF0EE}
+.sources-desc{font-size:12px;color:#74727E;margin-bottom:12px;line-height:16px}
+.sources-btns{display:flex;gap:10px}
+.source-option{flex:1;padding:14px 12px;border:1.5px solid #CDCDD0;border-radius:8px;background:#fff;cursor:pointer;font-family:inherit;font-size:13px;font-weight:600;color:#2D3133;transition:all .15s;text-align:center}
+.source-option.sel{border:2px solid #93919A;background:#EFEFF1;color:#0C0C0C}
+.source-option:hover:not(.sel){border-color:#0B4DD0}
+.source-option span{display:block;font-size:11px;font-weight:400;color:#5E6061;margin-top:2px}
+.hl-modal-footer{padding:14px 24px;border-top:1px solid #EFEFF1;display:flex;justify-content:flex-end;flex-shrink:0;background:#fff}
+.finalizar-btn{height:32px;padding:0 16px;background:#0B4DD0;color:#fff;border:none;border-radius:16px;font-size:13px;font-weight:600;font-family:inherit;cursor:pointer}
+.finalizar-btn:hover{background:#0940B8}
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div class="logo"><img src="assets/logo-infojobs.svg" height="22" alt="InfoJobs" style="display:block"></div>
+</header>
+
+<main class="main">
+
+  <div class="progress" id="progress"></div>
+
+  <div class="page-heading" id="heading">
+    <h1></h1><p></p>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       PASO 1 – INFO DE OFERTA
+  ═══════════════════════════════════════════ -->
+  <div class="panel active" id="p1">
+
+    <!-- Empresa -->
+    <div class="fieldset">
+      <div class="fs-title">Empresa</div>
+      <div class="card">
+        <div class="ff" style="max-width:415px">
+          <label for="empresa">Empresa</label>
+          <input id="empresa" type="text" value="Accenture España S.L." disabled>
+          <span class="hint">Para editar el nombre ve a Tu cuenta o llama a Atención al cliente.</span>
+        </div>
+        <label class="cbx">
+          <input type="checkbox" id="hideEmpresa">
+          <span class="cbx-label">Ocultar el nombre de la empresa por <span class="price">160€</span> +IVA</span>
+        </label>
+      </div>
+    </div>
+
+    <!-- Puesto -->
+    <div class="fieldset">
+      <div class="fs-title">Puesto</div>
+      <div class="card">
+        <div class="ff" style="max-width:560px">
+          <label for="puesto">Puesto</label>
+          <input id="puesto" type="text" value="" placeholder="Ej: Desarrollador/a Full Stack" onblur="triggerAISugg()">
+          <span class="hint">Escribe el nombre del puesto o selecciona uno de la lista.</span>
+        </div>
+        <div class="ff" style="max-width:208px">
+          <label for="vacantes">Número de vacantes</label>
+          <input id="vacantes" type="number" value="1" min="1">
+        </div>
+        <div class="row">
+          <div class="ff">
+            <label for="nivel">Nivel del puesto</label>
+            <select id="nivel" onchange="triggerAISugg()">
+              <option value="">Selecciona</option>
+              <option>Sin experiencia / Recién titulado</option>
+              <option>Junior</option>
+              <option>Mid-level</option>
+              <option>Senior</option>
+              <option>Lead / Principal</option>
+              <option>Manager</option>
+            </select>
+            <span class="hint">Nivel de responsabilidad que ocupará en base a su cargo.</span>
+          </div>
+          <div class="ff">
+            <label for="personal">Personal a cargo</label>
+            <select id="personal">
+              <option value="" selected>Selecciona</option>
+              <option>Sin personal a cargo</option>
+              <option>1 – 5 personas</option>
+              <option>6 – 10 personas</option>
+              <option>11 – 20 personas</option>
+              <option>Más de 20 personas</option>
+            </select>
+            <span class="hint">Número de personas que formarán su equipo de reporte.</span>
+          </div>
+        </div>
+
+        <div class="subtitle">Ubicación del puesto</div>
+
+        <div class="ff" style="max-width:402px">
+          <label for="pais">País</label>
+          <select id="pais">
+            <option selected>España</option>
+            <option>Portugal</option>
+            <option>Francia</option>
+            <option>Alemania</option>
+          </select>
+        </div>
+        <div class="row">
+          <div class="ff">
+            <label for="prov">Provincia</label>
+            <select id="prov" onchange="triggerAISugg();updatePoblaciones()">
+              <option value="">Selecciona</option>
+              <option>Madrid</option>
+              <option>Barcelona</option>
+              <option>Valencia</option>
+              <option>Sevilla</option>
+              <option>Vizcaya</option>
+              <option>A Coruña</option>
+            </select>
+          </div>
+          <div class="ff">
+            <label for="pobl">Población</label>
+            <select id="pobl">
+              <option value="">Selecciona</option>
+            </select>
+          </div>
+          <div class="ff w135">
+            <label for="cp">Código postal</label>
+            <input id="cp" type="text" value="" maxlength="5" placeholder="28001">
+          </div>
+        </div>
+        <div class="ff" style="max-width:402px">
+          <label for="modalidad">Modalidad de trabajo</label>
+          <select id="modalidad" onchange="triggerAISugg()">
+            <option value="">Selecciona</option>
+            <option>Presencial</option>
+            <option>Teletrabajo</option>
+            <option>Híbrido</option>
+          </select>
+        </div>
+        <label class="cbx">
+          <input type="checkbox" id="masProvincias">
+          <span class="cbx-label">Muestra tu oferta en más provincias y llega a más talento desde <span class="price">85€</span> +IVA. <a href="#" class="lnk" onclick="return false">Más información</a></span>
+        </label>
+      </div>
+    </div>
+
+    <!-- Perfil -->
+    <div class="fieldset">
+      <div class="fs-title">Perfil del puesto</div>
+      <div class="card">
+        <div class="ff" style="max-width:420px">
+          <label for="exp">Años de experiencia mínima en el puesto</label>
+          <select id="exp">
+            <option>Sin experiencia</option>
+            <option>Al menos 1 año</option>
+            <option selected>Al menos 2 años</option>
+            <option>Al menos 3 años</option>
+            <option>Al menos 5 años</option>
+            <option>Más de 10 años</option>
+          </select>
+          <span class="hint">Selecciona los años de experiencia mínimos.</span>
+        </div>
+        <div class="ff" style="max-width:420px">
+          <label for="estudios">Estudios mínimos</label>
+          <select id="estudios">
+            <option value="">Selecciona</option>
+            <option>Sin estudios</option>
+            <option>ESO</option>
+            <option>Bachillerato</option>
+            <option>Formación Profesional (FP)</option>
+            <option>Grado universitario</option>
+            <option>Máster / Posgrado</option>
+            <option>Doctorado</option>
+          </select>
+        </div>
+
+        <div>
+          <div class="lbl" style="font-size:14px;margin-bottom:8px;display:flex;gap:4px">
+            Idiomas <span style="color:var(--gray)">(Opcional)</span>
+          </div>
+          <div class="lang-tags" id="langTags">
+          </div>
+          <button class="add-btn" style="margin-top:10px" onclick="addLanguage()">
+            <span style="font-size:20px;line-height:1;margin-top:-1px">+</span> Añadir idioma
+          </button>
+        </div>
+
+        <div class="ff">
+          <label>Conocimientos <span class="opt">(Opcional)</span></label>
+          <div class="tags-wrap" id="tagsWrap" onclick="document.getElementById('tagIn').focus()">
+            <input class="tag-input" id="tagIn" type="text" onkeydown="tagKeydown(event)" placeholder="Añade conocimientos y pulsa Intro">
+          </div>
+          <span class="hint">Añade hasta 10 conocimientos pulsando la tecla Intro.</span>
+        </div>
+
+        <div id="suggSection" style="display:none">
+          <div class="lbl" style="font-size:14px;margin-bottom:8px;display:flex;align-items:center;gap:6px">
+            ✨ <span>Sugerencias de conocimientos basadas en tu oferta:</span>
+          </div>
+          <div class="sugg-list" id="suggList"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Descripción -->
+    <div class="fieldset">
+      <div class="fs-title">Descripción</div>
+      <div class="card" style="gap:16px">
+        <p style="font-size:16px;color:var(--dark);line-height:20px;letter-spacing:.2px">
+          Si lo necesitas, te podemos ayudar a crear la descripción usando Inteligencia Artificial. Revisa que la descripción generada es correcta y se adapta al puesto.
+        </p>
+        <button class="ai-btn" id="genDescBtn" onclick="genDesc()">✨ Generar descripción</button>
+        <div class="ff">
+          <textarea id="desc" oninput="countChars(this)" placeholder="Escribe aquí la descripción del puesto o usa la IA para generarla automáticamente."></textarea>
+          <div style="display:flex;justify-content:space-between">
+            <span class="hint">Mínimo 100 caracteres y máximo 4000</span>
+            <span class="hint right" id="charCnt">0/4000</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Salario -->
+    <div class="fieldset">
+      <div class="fs-title">Salario</div>
+      <div class="card">
+        <div>
+          <div style="font-size:16px;color:var(--black);margin-bottom:8px">Tipo (bruto)</div>
+          <div class="btn-grp" id="salType">
+            <button onclick="salBtn(this)">HORA</button>
+            <button onclick="salBtn(this)">MES</button>
+            <button class="active" onclick="salBtn(this)">AÑO</button>
+          </div>
+        </div>
+        <div class="row">
+          <div class="ff">
+            <label for="salMin">Mínimo</label>
+            <select id="salMin">
+              <option value="">Selecciona</option>
+              <option>18.000 €</option><option>20.000 €</option><option>22.000 €</option>
+              <option>25.000 €</option><option>28.000 €</option><option>30.000 €</option>
+              <option>35.000 €</option><option>40.000 €</option>
+            </select>
+          </div>
+          <div class="ff">
+            <label for="salMax">Máximo</label>
+            <select id="salMax">
+              <option value="">Selecciona</option>
+              <option>20.000 €</option><option>25.000 €</option><option>30.000 €</option>
+              <option>35.000 €</option><option>40.000 €</option>
+              <option>45.000 €</option><option>50.000 €</option><option>55.000 €</option>
+            </select>
+            <span class="hint">La diferencia entre salario mínimo y máximo no debe superar los 10.000€</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Contrato -->
+    <div class="fieldset">
+      <div class="fs-title">Contrato y categoría</div>
+      <div class="card">
+        <div class="row">
+          <div class="ff">
+            <label for="contrato">Tipo de contrato</label>
+            <select id="contrato">
+              <option value="">Selecciona</option>
+              <option>Indefinido</option>
+              <option>Temporal</option>
+              <option>Prácticas</option>
+              <option>Obra o servicio</option>
+              <option>Autónomo / Freelance</option>
+            </select>
+          </div>
+          <div class="ff">
+            <label for="jornada">Jornada laboral</label>
+            <select id="jornada">
+              <option value="">Selecciona</option>
+              <option>Jornada completa</option>
+              <option>Jornada parcial</option>
+              <option>Indiferente</option>
+            </select>
+          </div>
+        </div>
+        <div class="row">
+          <div class="ff">
+            <label for="cat">Categoría</label>
+            <select id="cat">
+              <option value="">Selecciona</option>
+              <option>Artes gráficas</option>
+              <option>Artesanía</option>
+              <option>Atención sanitaria</option>
+              <option>Audiovisual</option>
+              <option>Automoción</option>
+              <option>Banca</option>
+              <option>Bellas Artes</option>
+              <option>Bibliotecas</option>
+              <option>Construcción</option>
+              <option>Consultoría</option>
+              <option>Defensa</option>
+              <option>Deportes</option>
+              <option>Desarrollo de programación</option>
+              <option>Diseño</option>
+              <option>Editorial</option>
+              <option>Educación</option>
+              <option>Electrónica</option>
+              <option>Energías renovables</option>
+              <option>Entretenimiento</option>
+              <option>Fotografía</option>
+              <option>Gran consumo</option>
+              <option>Hostelería</option>
+              <option>Imprenta</option>
+              <option>Industria aeroespacial</option>
+              <option>Industria naval</option>
+              <option>Industria química</option>
+              <option>Industria textil</option>
+              <option>Ingeniería</option>
+              <option>Internet</option>
+              <option>Inversiones</option>
+              <option>Investigación</option>
+              <option>Limpieza</option>
+              <option>Logística</option>
+              <option>Marketing</option>
+              <option>Medicina</option>
+              <option>Medios de comunicación</option>
+              <option>Minería</option>
+              <option>Museos</option>
+              <option>Música</option>
+              <option>Multimedia / ONGs</option>
+              <option>Publicidad</option>
+              <option>Salud</option>
+              <option>Seguros</option>
+              <option>Servicios de asesoría</option>
+              <option>Servicios de RRHH</option>
+              <option>Servicios sociales</option>
+              <option>Telecomunicaciones</option>
+              <option>Telemarketing</option>
+              <option>Traducción</option>
+              <option>Transporte</option>
+              <option>Venta al mayor</option>
+              <option>Venta al menor</option>
+              <option>Veterinaria</option>
+              <option>Videojuegos</option>
+              <option>Otros</option>
+            </select>
+          </div>
+          <div class="ff">
+            <label for="subcat">Subcategoría</label>
+            <select id="subcat">
+              <option value="">Selecciona</option>
+              <option>Desarrollo de software / Web</option>
+              <option>Análisis / Inteligencia de negocio</option>
+              <option>Sistemas / Infraestructura</option>
+              <option>Ciberseguridad</option>
+              <option>Inteligencia Artificial / ML</option>
+            </select>
+          </div>
+        </div>
+        <p style="font-size:14px;color:var(--dark);line-height:16px;letter-spacing:.1px">
+          La categoría y subcategoría que incluyas en la oferta corresponde al puesto vacante y no necesariamente a la actividad de tu empresa.
+        </p>
+      </div>
+    </div>
+
+    <div class="bottom-nav">
+      <button class="btn btn-err" onclick="saveExit()">Guardar y salir</button>
+      <div class="bnav-r">
+        <button class="btn btn-ghost" onclick="preview()">Vista previa</button>
+        <button class="btn btn-outline" disabled>Anterior</button>
+        <button class="btn btn-primary" onclick="go(2)">Siguiente</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       PASO 2 – CRIBA AUTOMÁTICA
+  ═══════════════════════════════════════════ -->
+  <div class="panel" id="p2">
+    <div class="fieldset">
+      <div class="fs-title">Criba automática de CVs <span>(Opcional)</span></div>
+      <div class="card">
+        <div class="notif">
+          <span class="notif-icon">ℹ</span>
+          <p>Al activar esta funcionalidad los CVs que no cumplan estos requisitos pasarán automáticamente a la carpeta de "Descartados". Siempre tendrás acceso a los CVs y podrás consultarlos.</p>
+        </div>
+        <div class="filter-row">
+          <p id="filterProv">Cribar CVs por: Provincia</p>
+          <div class="toggle" onclick="tog(this)"><div class="toggle-knob"></div></div>
+        </div>
+        <div class="filter-row">
+          <p id="filterPobl">Cribar CVs por: Población</p>
+          <div class="toggle" onclick="tog(this)"><div class="toggle-knob"></div></div>
+        </div>
+        <div class="filter-row">
+          <p id="filterExp">Cribar CVs por: Experiencia similar en el puesto</p>
+          <div class="toggle on" onclick="tog(this)"><div class="toggle-knob"></div></div>
+        </div>
+        <div class="filter-row">
+          <p id="filterEst">Cribar CVs por: Estudios mínimos</p>
+          <div class="toggle" onclick="tog(this)"><div class="toggle-knob"></div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="bottom-nav">
+      <button class="btn btn-err" onclick="saveExit()">Guardar y salir</button>
+      <div class="bnav-r">
+        <button class="btn btn-ghost" onclick="preview()">Vista previa</button>
+        <button class="btn btn-outline" onclick="go(1)">Anterior</button>
+        <button class="btn btn-primary" onclick="go(3)">Siguiente</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       PASO 3 – PREGUNTAS DE EVALUACIÓN
+  ═══════════════════════════════════════════ -->
+  <div class="panel" id="p3">
+
+    <!-- Preguntas de selección única -->
+    <div class="fieldset">
+      <div class="scr-hd">
+        <div class="scr-hd-left">
+          <div class="scr-icon">
+            <div class="check-circle">
+              <svg width="13" height="10" viewBox="0 0 13 10" fill="none"><path d="M1 5l3.5 3.5L12 1" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+            <span class="fs-title">Preguntas de selección única</span>
+          </div>
+          <p style="font-size:14px;color:var(--gray);line-height:16px;margin-left:34px;margin-top:4px">Usa estas preguntas para que el candidato seleccione una única respuesta entre varias opciones.</p>
+        </div>
+        <button class="add-btn" onclick="addSelQ()" style="white-space:nowrap;flex-shrink:0">
+          <span style="font-size:18px;line-height:1">+</span> Añadir pregunta
+        </button>
+      </div>
+
+      <div class="card" style="gap:16px" id="selQs">
+        <!-- Q1 -->
+        <div class="q-card">
+          <div class="q-head"><span class="q-num">Pregunta 1</span><button class="q-del" onclick="delQ(this)" title="Eliminar">×</button></div>
+          <div class="ff"><label style="font-size:14px;font-weight:500">Pregunta</label>
+            <input type="text" value="" placeholder="Escribe la pregunta aquí">
+          </div>
+          <div>
+            <div style="font-size:12px;color:var(--gray);margin-bottom:6px">Opciones de respuesta</div>
+            <div class="q-options">
+              <div class="q-opt"><input type="text" value="" placeholder="Opción 1"><button class="q-opt-del" onclick="delOpt(this)">×</button></div>
+              <div class="q-opt"><input type="text" value="" placeholder="Opción 2"><button class="q-opt-del" onclick="delOpt(this)">×</button></div>
+            </div>
+            <button class="add-opt-btn" onclick="addOpt(this)">+ Añadir opción</button>
+          </div>
+        </div>
+
+        <!-- Q2 -->
+        <div class="q-card">
+          <div class="q-head"><span class="q-num">Pregunta 2</span><button class="q-del" onclick="delQ(this)" title="Eliminar">×</button></div>
+          <div class="ff"><label style="font-size:14px;font-weight:500">Pregunta</label>
+            <input type="text" value="" placeholder="Escribe la pregunta aquí">
+          </div>
+          <div>
+            <div style="font-size:12px;color:var(--gray);margin-bottom:6px">Opciones de respuesta</div>
+            <div class="q-options">
+              <div class="q-opt"><input type="text" value="" placeholder="Opción 1"><button class="q-opt-del" onclick="delOpt(this)">×</button></div>
+              <div class="q-opt"><input type="text" value="" placeholder="Opción 2"><button class="q-opt-del" onclick="delOpt(this)">×</button></div>
+            </div>
+            <button class="add-opt-btn" onclick="addOpt(this)">+ Añadir opción</button>
+          </div>
+        </div>
+
+        <button class="add-q-btn" onclick="addSelQ()">+ Añadir pregunta de selección</button>
+      </div>
+    </div>
+
+    <!-- Preguntas abiertas -->
+    <div class="fieldset">
+      <div class="scr-hd">
+        <div class="scr-hd-left">
+          <div class="scr-icon">
+            <div class="hamburger"><span></span><span></span><span></span></div>
+            <span class="fs-title">Preguntas abiertas</span>
+          </div>
+          <p style="font-size:14px;color:var(--gray);line-height:16px;margin-left:34px;margin-top:4px">Usa estas preguntas para que el candidato responda con un texto redactado.</p>
+        </div>
+      </div>
+
+      <div class="card" style="gap:16px" id="openQs">
+        <div class="q-card">
+          <div class="q-head"><span class="q-num">Pregunta 1</span><button class="q-del" onclick="delQ(this)" title="Eliminar">×</button></div>
+          <div class="ff"><label style="font-size:14px;font-weight:500">Pregunta</label>
+            <input type="text" value="" placeholder="Escribe la pregunta aquí">
+          </div>
+        </div>
+        <button class="add-q-btn" onclick="addOpenQ()">+ Añadir pregunta abierta</button>
+      </div>
+    </div>
+
+    <div class="bottom-nav">
+      <button class="btn btn-err" onclick="saveExit()">Guardar y salir</button>
+      <div class="bnav-r">
+        <button class="btn btn-ghost" onclick="preview()">Vista previa</button>
+        <button class="btn btn-outline" onclick="go(2)">Anterior</button>
+        <button class="btn btn-primary" onclick="publish()">Publicar oferta</button>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<div class="toast" id="toast"></div>
+
+<!-- ════════════════════════════════════════
+     LISTADO DE OFERTAS
+════════════════════════════════════════ -->
+<div id="listado">
+  <nav class="nav-header">
+    <div class="nav-logo"><img src="assets/logo-infojobs-reduced.svg" alt="IJ"></div>
+    <div class="nav-links">
+      <a class="nav-link" href="#" onclick="return false">Inicio</a>
+      <a class="nav-link active" href="#" onclick="return false">Tus ofertas y CVs</a>
+      <a class="nav-link" href="#" onclick="return false">Buscador de profesionales</a>
+      <a class="nav-link" href="#" onclick="return false">Productos y ahorro</a>
+      <a class="nav-link" href="#" onclick="return false">Estadísticas</a>
+    </div>
+    <div class="nav-right">
+      <button class="nav-publish-btn" onclick="showForm()">+ Publicar oferta</button>
+      <div class="nav-avatar">AC</div>
+    </div>
+  </nav>
+
+  <div class="listado-wrap">
+    <div class="listado-heading">
+      <h1>Mis ofertas</h1>
+      <div class="listado-search">
+        <input type="text" placeholder="🔍  Buscar por título de oferta...">
+        <select>
+          <option>Ordenar por: Más recientes</option>
+          <option>Ordenar por: Más candidatos</option>
+          <option>Ordenar por: Nombre A-Z</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="tabs">
+      <div class="tab active" onclick="selectTab(this)">Abiertas <span style="background:var(--primary);color:#fff;border-radius:12px;padding:1px 7px;font-size:12px;margin-left:6px" id="activeCount">4</span></div>
+      <div class="tab" onclick="selectTab(this)">En pausa</div>
+      <div class="tab" onclick="selectTab(this)">Caducadas</div>
+    </div>
+
+    <div class="list-toolbar">
+      <div class="list-toolbar-left">
+        <span class="toolbar-label" id="offerCount">4 ofertas activas</span>
+      </div>
+    </div>
+
+    <!-- Banner nueva oferta -->
+    <div class="new-offer-banner" id="newBanner">
+      <span style="font-size:20px">✅</span>
+      <p>Tu oferta <strong id="bannerTitle">—</strong> se ha publicado correctamente y ya está recibiendo candidaturas.</p>
+      <button onclick="this.parentElement.style.display='none'">×</button>
+    </div>
+
+    <div class="offer-list" id="offerList">
+
+      <!-- OFERTA NUEVA (se rellena por JS) -->
+      <div class="offer-card new-offer" id="newOfferCard">
+        <div class="offer-top">
+          <input type="checkbox" class="offer-cb">
+          <div class="offer-main">
+            <div class="offer-details">
+              <div class="offer-labels">
+                <span class="badge-open">Abierta</span>
+                <span class="badge-pill badge-new">✨ Nueva</span>
+              </div>
+              <div class="offer-title" id="newOfferTitle">—</div>
+              <div class="offer-meta">
+                <div class="offer-meta-item">
+                  <svg class="offer-meta-icon" viewBox="0 0 16 16" fill="none"><path d="M8 1.5C5.51 1.5 3.5 3.51 3.5 6c0 3.75 4.5 8.5 4.5 8.5s4.5-4.75 4.5-8.5c0-2.49-2.01-4.5-4.5-4.5zm0 6.1A1.6 1.6 0 1 1 8 4.3a1.6 1.6 0 0 1 0 3.3z" fill="#74727E"/></svg>
+                  <span id="newOfferLoc">—</span>
+                </div>
+                <div class="meta-divider"></div>
+                <div class="offer-meta-item">
+                  <svg class="offer-meta-icon" viewBox="0 0 16 16" fill="none"><rect x="2" y="3" width="12" height="11" rx="1.5" stroke="#74727E" stroke-width="1.3"/><path d="M5 2v2M11 2v2M2 7h12" stroke="#74727E" stroke-width="1.3" stroke-linecap="round"/></svg>
+                  <span id="newOfferDate">—</span>
+                </div>
+                <div class="meta-divider"></div>
+                <div class="offer-meta-item">
+                  <svg class="offer-meta-icon" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6" stroke="#74727E" stroke-width="1.3"/><path d="M8 5v3.5l2.5 1.5" stroke="#74727E" stroke-width="1.3" stroke-linecap="round"/></svg>
+                  Caduca en: 30 días
+                </div>
+              </div>
+            </div>
+            <div class="offer-actions">
+              <div class="offer-cands">
+                <svg viewBox="0 0 16 16" fill="none"><circle cx="8" cy="5.5" r="2.5" stroke="#0C0C0C" stroke-width="1.3"/><path d="M2.5 13c0-2.76 2.46-5 5.5-5s5.5 2.24 5.5 5" stroke="#0C0C0C" stroke-width="1.3" stroke-linecap="round"/></svg>
+                0
+              </div>
+              <button class="offer-more" title="Más opciones">⋮</button>
+            </div>
+          </div>
+        </div>
+        <div class="offer-counters">
+          <div class="counter-item"><div class="counter-num">0</div><div class="counter-label">Sin valorar</div></div>
+          <div class="counter-item"><div class="counter-num">0</div><div class="counter-label">Preseleccionados</div></div>
+          <div class="counter-item"><div class="counter-num">-</div><div class="counter-label">Entrevista</div></div>
+          <div class="counter-item"><div class="counter-num">-</div><div class="counter-label">Contratados</div></div>
+          <div class="counter-item"><div class="counter-num">0</div><div class="counter-label">Descartados</div></div>
+        </div>
+      </div>
+
+      <!-- OFERTA 2 -->
+      <div class="offer-card">
+        <div class="offer-top">
+          <input type="checkbox" class="offer-cb">
+          <div class="offer-main">
+            <div class="offer-details">
+              <div class="offer-labels">
+                <span class="badge-open">Abierta</span>
+                <span class="badge-pill">Subir semanal</span>
+              </div>
+              <div class="offer-title">Diseñador/a UX Senior</div>
+              <div class="offer-meta">
+                <div class="offer-meta-item">
+                  <svg class="offer-meta-icon" viewBox="0 0 16 16" fill="none"><path d="M8 1.5C5.51 1.5 3.5 3.51 3.5 6c0 3.75 4.5 8.5 4.5 8.5s4.5-4.75 4.5-8.5c0-2.49-2.01-4.5-4.5-4.5zm0 6.1A1.6 1.6 0 1 1 8 4.3a1.6 1.6 0 0 1 0 3.3z" fill="#74727E"/></svg>
+                  Madrid, Madrid
+                </div>
+                <div class="meta-divider"></div>
+                <div class="offer-meta-item">
+                  <svg class="offer-meta-icon" viewBox="0 0 16 16" fill="none"><rect x="2" y="3" width="12" height="11" rx="1.5" stroke="#74727E" stroke-width="1.3"/><path d="M5 2v2M11 2v2M2 7h12" stroke="#74727E" stroke-width="1.3" stroke-linecap="round"/></svg>
+                  12 sep 2025
+                </div>
+                <div class="meta-divider"></div>
+                <div class="offer-meta-item">
+                  <svg class="offer-meta-icon" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6" stroke="#74727E" stroke-width="1.3"/><path d="M8 5v3.5l2.5 1.5" stroke="#74727E" stroke-width="1.3" stroke-linecap="round"/></svg>
+                  Caduca en: 12 días
+                </div>
+              </div>
+            </div>
+            <div class="offer-actions">
+              <div class="offer-cands">
+                <svg viewBox="0 0 16 16" fill="none"><circle cx="8" cy="5.5" r="2.5" stroke="#0C0C0C" stroke-width="1.3"/><path d="M2.5 13c0-2.76 2.46-5 5.5-5s5.5 2.24 5.5 5" stroke="#0C0C0C" stroke-width="1.3" stroke-linecap="round"/></svg>
+                34
+              </div>
+              <button class="offer-more">⋮</button>
+            </div>
+          </div>
+        </div>
+        <div class="offer-counters">
+          <div class="counter-item"><div class="counter-num">18</div><div class="counter-label">Sin valorar</div></div>
+          <div class="counter-item"><div class="counter-num">8</div><div class="counter-label">Preseleccionados</div></div>
+          <div class="counter-item"><div class="counter-num">4</div><div class="counter-label">Entrevista</div></div>
+          <div class="counter-item"><div class="counter-num">-</div><div class="counter-label">Contratados</div></div>
+          <div class="counter-item"><div class="counter-num">4</div><div class="counter-label">Descartados</div></div>
+        </div>
+      </div>
+
+      <!-- OFERTA 3 -->
+      <div class="offer-card">
+        <div class="offer-top">
+          <input type="checkbox" class="offer-cb">
+          <div class="offer-main">
+            <div class="offer-details">
+              <div class="offer-labels">
+                <span class="badge-open">Abierta</span>
+              </div>
+              <div class="offer-title">Product Manager – Plataforma Digital</div>
+              <div class="offer-meta">
+                <div class="offer-meta-item">
+                  <svg class="offer-meta-icon" viewBox="0 0 16 16" fill="none"><path d="M8 1.5C5.51 1.5 3.5 3.51 3.5 6c0 3.75 4.5 8.5 4.5 8.5s4.5-4.75 4.5-8.5c0-2.49-2.01-4.5-4.5-4.5zm0 6.1A1.6 1.6 0 1 1 8 4.3a1.6 1.6 0 0 1 0 3.3z" fill="#74727E"/></svg>
+                  Madrid, Madrid
+                </div>
+                <div class="meta-divider"></div>
+                <div class="offer-meta-item">
+                  <svg class="offer-meta-icon" viewBox="0 0 16 16" fill="none"><rect x="2" y="3" width="12" height="11" rx="1.5" stroke="#74727E" stroke-width="1.3"/><path d="M5 2v2M11 2v2M2 7h12" stroke="#74727E" stroke-width="1.3" stroke-linecap="round"/></svg>
+                  03 ago 2025
+                </div>
+                <div class="meta-divider"></div>
+                <div class="offer-meta-item">
+                  <svg class="offer-meta-icon" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6" stroke="#74727E" stroke-width="1.3"/><path d="M8 5v3.5l2.5 1.5" stroke="#74727E" stroke-width="1.3" stroke-linecap="round"/></svg>
+                  Caduca en: 3 días
+                </div>
+              </div>
+            </div>
+            <div class="offer-actions">
+              <div class="offer-cands">
+                <svg viewBox="0 0 16 16" fill="none"><circle cx="8" cy="5.5" r="2.5" stroke="#0C0C0C" stroke-width="1.3"/><path d="M2.5 13c0-2.76 2.46-5 5.5-5s5.5 2.24 5.5 5" stroke="#0C0C0C" stroke-width="1.3" stroke-linecap="round"/></svg>
+                67
+              </div>
+              <button class="offer-more">⋮</button>
+            </div>
+          </div>
+        </div>
+        <div class="offer-counters">
+          <div class="counter-item"><div class="counter-num">32</div><div class="counter-label">Sin valorar</div></div>
+          <div class="counter-item"><div class="counter-num">15</div><div class="counter-label">Preseleccionados</div></div>
+          <div class="counter-item"><div class="counter-num">12</div><div class="counter-label">Entrevista</div></div>
+          <div class="counter-item"><div class="counter-num">2</div><div class="counter-label">Contratados</div></div>
+          <div class="counter-item"><div class="counter-num">6</div><div class="counter-label">Descartados</div></div>
+        </div>
+      </div>
+
+      <!-- OFERTA 4 -->
+      <div class="offer-card">
+        <div class="offer-top">
+          <input type="checkbox" class="offer-cb">
+          <div class="offer-main">
+            <div class="offer-details">
+              <div class="offer-labels">
+                <span class="badge-open">Abierta</span>
+              </div>
+              <div class="offer-title">Data Engineer – Equipo de Plataforma</div>
+              <div class="offer-meta">
+                <div class="offer-meta-item">
+                  <svg class="offer-meta-icon" viewBox="0 0 16 16" fill="none"><path d="M8 1.5C5.51 1.5 3.5 3.51 3.5 6c0 3.75 4.5 8.5 4.5 8.5s4.5-4.75 4.5-8.5c0-2.49-2.01-4.5-4.5-4.5zm0 6.1A1.6 1.6 0 1 1 8 4.3a1.6 1.6 0 0 1 0 3.3z" fill="#74727E"/></svg>
+                  Barcelona, Barcelona
+                </div>
+                <div class="meta-divider"></div>
+                <div class="offer-meta-item">
+                  <svg class="offer-meta-icon" viewBox="0 0 16 16" fill="none"><rect x="2" y="3" width="12" height="11" rx="1.5" stroke="#74727E" stroke-width="1.3"/><path d="M5 2v2M11 2v2M2 7h12" stroke="#74727E" stroke-width="1.3" stroke-linecap="round"/></svg>
+                  18 jul 2025
+                </div>
+                <div class="meta-divider"></div>
+                <div class="offer-meta-item">
+                  <svg class="offer-meta-icon" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6" stroke="#74727E" stroke-width="1.3"/><path d="M8 5v3.5l2.5 1.5" stroke="#74727E" stroke-width="1.3" stroke-linecap="round"/></svg>
+                  Caduca en: 21 días
+                </div>
+              </div>
+            </div>
+            <div class="offer-actions">
+              <div class="offer-cands">
+                <svg viewBox="0 0 16 16" fill="none"><circle cx="8" cy="5.5" r="2.5" stroke="#0C0C0C" stroke-width="1.3"/><path d="M2.5 13c0-2.76 2.46-5 5.5-5s5.5 2.24 5.5 5" stroke="#0C0C0C" stroke-width="1.3" stroke-linecap="round"/></svg>
+                28
+              </div>
+              <button class="offer-more">⋮</button>
+            </div>
+          </div>
+        </div>
+        <div class="offer-counters">
+          <div class="counter-item"><div class="counter-num">14</div><div class="counter-label">Sin valorar</div></div>
+          <div class="counter-item"><div class="counter-num">7</div><div class="counter-label">Preseleccionados</div></div>
+          <div class="counter-item"><div class="counter-num">5</div><div class="counter-label">Entrevista</div></div>
+          <div class="counter-item"><div class="counter-num">-</div><div class="counter-label">Contratados</div></div>
+          <div class="counter-item"><div class="counter-num">2</div><div class="counter-label">Descartados</div></div>
+        </div>
+      </div>
+
+    </div><!-- /offer-list -->
+
+    <div class="pagination">
+      <button class="page-btn" disabled>‹</button>
+      <button class="page-btn active">1</button>
+      <button class="page-btn" onclick="selectPage(this)">2</button>
+      <button class="page-btn" onclick="selectPage(this)">3</button>
+      <button class="page-btn">›</button>
+    </div>
+  </div><!-- /listado-wrap -->
+</div><!-- /listado -->
+
+<script>
+let cur = 1;
+const steps = [
+  {label:'Oferta',   h1:'Oferta',              sub:'Comienza a crear tu oferta y añade toda la información necesaria. Una vez publicada empezarás a recibir candidaturas.'},
+  {label:'Requisitos',h1:'Criba automática',   sub:'Podrás cribar por algunos criterios para facilitar tu búsqueda.'},
+  {label:'Evaluación',h1:'Preguntas de evaluación', sub:'Añade preguntas para evaluar a los candidatos antes de revisar sus CVs.'}
+];
+
+function renderProgress(){
+  const c=document.getElementById('progress');
+  let h='';
+  steps.forEach((s,i)=>{
+    const n=i+1;
+    if(i>0) h+=`<div class="step-line${n<=cur?' done':''}"></div>`;
+    const state=n<cur?'done':n===cur?'active':'';
+    h+=`<div class="step ${state}">
+      <div class="step-check"></div>
+      <div class="step-num">${n}</div>
+      <div class="step-label">${s.label}</div>
+    </div>`;
+  });
+  c.innerHTML=h;
+  const s=steps[cur-1];
+  document.getElementById('heading').innerHTML=`<h1>${s.h1}</h1><p>${s.sub}</p>`;
+}
+
+function go(n){
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.getElementById('p'+n).classList.add('active');
+  cur=n; renderProgress();
+  if(n===2) updateStep2Filters();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function toast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),3000);
+}
+
+// ── Init
+document.addEventListener('DOMContentLoaded',()=>{
+  renderProgress();
+  countChars(document.getElementById('desc'));
+});
+
+// ── Desc counter
+function countChars(el){
+  document.getElementById('charCnt').textContent=el.value.length+'/4000';
+}
+
+// ── AI description
+function genDesc(){
+  const puesto  = document.getElementById('puesto').value  || 'el puesto';
+  const nivel   = document.getElementById('nivel').value   || 'nivel medio';
+  const provEl  = document.getElementById('prov');
+  const modalEl = document.getElementById('modalidad');
+  const prov    = provEl.options[provEl.selectedIndex]?.value || 'España';
+  const modal   = modalEl.options[modalEl.selectedIndex]?.value || '';
+  const modalTxt= modal ? ` en modalidad ${modal.toLowerCase()}` : '';
+  const tags    = [...document.querySelectorAll('#tagsWrap .tag')].map(t=>t.firstChild.textContent.trim()).join(', ');
+  const techLine= tags ? `• Experiencia con: ${tags}\n` : '';
+  const ta      = document.getElementById('desc');
+  const btn     = document.getElementById('genDescBtn');
+  ta.value='✨ Generando con IA...'; ta.disabled=true; btn.disabled=true;
+  setTimeout(()=>{
+    ta.value =
+`Buscamos un/a ${puesto} (perfil ${nivel.toLowerCase()}) para unirse a nuestro equipo en ${prov}${modalTxt}.
+
+Responsabilidades:
+• Desarrollo y mantenimiento de soluciones en el área del puesto
+• Colaboración con equipos multidisciplinares de producto y tecnología
+• Participación en decisiones técnicas y de diseño de soluciones
+• Aportación de mejoras continuas al stack tecnológico
+
+Requisitos:
+${techLine}• Capacidad de trabajo en equipo y comunicación efectiva
+• Proactividad y orientación a resultados
+• Inglés a nivel profesional (valorable)
+
+Ofrecemos:
+• Proyecto estable con posibilidades de desarrollo profesional
+• Ambiente dinámico y equipo comprometido
+• Salario competitivo según experiencia`;
+    ta.disabled=false; btn.disabled=false;
+    btn.textContent='✨ Generar descripción';
+    countChars(ta);
+    toast('Descripción generada con IA');
+  },1800);
+}
+
+// ── AI Skills suggestions
+const AI_SKILLS={
+  default:['Comunicación','Trabajo en equipo','Office 365','Excel','Inglés','Gestión del tiempo'],
+  dev:['React','TypeScript','Node.js','Git','Docker','AWS','PostgreSQL','GraphQL','Agile / Scrum','CI/CD','REST APIs','Kubernetes'],
+  frontend:['React','Vue.js','TypeScript','CSS / Sass','Figma','Webpack','Jest','Storybook','Accesibilidad web','Rendimiento web'],
+  backend:['Node.js','Python','Java','Spring Boot','Docker','Kubernetes','PostgreSQL','MongoDB','Redis','REST APIs','GraphQL','CI/CD'],
+  data:['Python','SQL','Spark','Hadoop','Airflow','Power BI','Tableau','Machine Learning','dbt','Snowflake','BigQuery','Pandas'],
+  design:['Figma','Sketch','Adobe XD','InVision','Prototyping','User Research','Usability Testing','Design Systems','Motion Design','Accessibility'],
+  pm:['Scrum','Agile','JIRA','Confluence','OKRs','Roadmapping','Stakeholder Management','A/B Testing','Analytics','SQL'],
+  marketing:['SEO','SEM','Google Analytics','Meta Ads','Copywriting','CRM','HubSpot','Salesforce','Email Marketing','Content Strategy'],
+  sales:['Salesforce','CRM','Negociación','Presentaciones','Prospección','Pipeline Management','Hubspot','LinkedIn Sales Navigator'],
+};
+let _aiSuggTimeout=null;
+
+const POBLACIONES = {
+  'Madrid':    ['Madrid','Pozuelo de Alarcón','Alcobendas','Leganés','Getafe','Alcalá de Henares','Móstoles','Fuenlabrada','Torrejón de Ardoz','Alcorcón','Las Rozas','Majadahonda','Rivas-Vaciamadrid','San Sebastián de los Reyes','Collado Villalba'],
+  'Barcelona': ['Barcelona',"L'Hospitalet de Llobregat",'Badalona','Terrassa','Sabadell','Mataró','Santa Coloma de Gramenet','Cornellà de Llobregat','Sant Boi de Llobregat','Rubí','Castelldefels','Gavà','Mollet del Vallès','Cerdanyola del Vallès','Granollers'],
+  'Valencia':  ['Valencia','Torrent','Gandía','Paterna','Sagunto','Alzira','Burjassot','Mislata','Xirivella','Aldaia','Alaquàs','Catarroja','Manises','Paiporta','Picanya'],
+  'Sevilla':   ['Sevilla','Dos Hermanas','Alcalá de Guadaíra','Utrera','Écija','La Rinconada','Mairena del Aljarafe','San Juan de Aznalfarache','Bormujos','Camas','Castilleja de la Cuesta','Tomares','Coria del Río','Morón de la Frontera','Marchena'],
+  'Vizcaya':   ['Bilbao','Barakaldo','Getxo','Basauri','Portugalete','Santurtzi','Leioa','Durango','Erandio','Galdakao','Sestao','Bermeo','Mungia','Amorebieta-Etxano','Gernika-Lumo'],
+  'A Coruña':  ['A Coruña','Santiago de Compostela','Ferrol','Oleiros','Cambre','Arteixo','Culleredo','Narón','Carballo','Betanzos','Ares','Fene','Mugardos','Pontedeume','Neda'],
+};
+
+function updatePoblaciones(){
+  const prov = document.getElementById('prov').value;
+  const poblSel = document.getElementById('pobl');
+  const list = POBLACIONES[prov] || [];
+  poblSel.innerHTML = '<option value="">Selecciona</option>' +
+    list.map(p => `<option>${p}</option>`).join('');
+}
+
+function triggerAISugg(){
+  const puesto=(document.getElementById('puesto').value||'').toLowerCase();
+  const nivel=document.getElementById('nivel').value;
+  const prov=document.getElementById('prov').value;
+  if(!puesto||!nivel||!prov) return;
+  clearTimeout(_aiSuggTimeout);
+  _aiSuggTimeout=setTimeout(()=>runAISugg(puesto),800);
+}
+
+function runAISugg(puesto){
+  let key='default';
+  if(/full.?stack|desarrollad|developer|programad|software|web dev/i.test(puesto)){
+    key=puesto.includes('frontend')||puesto.includes('front-end')?'frontend'
+       :puesto.includes('backend')||puesto.includes('back-end')?'backend':'dev';
+  } else if(/data|analytic|machine learn|ia |inteligencia|bi |scientist/i.test(puesto)) key='data';
+  else if(/diseñ|ux|ui |product design/i.test(puesto)) key='design';
+  else if(/product manager|pm |jefe de producto/i.test(puesto)) key='pm';
+  else if(/market|seo|sem|community|content/i.test(puesto)) key='marketing';
+  else if(/sales|comercial|ventas|account/i.test(puesto)) key='sales';
+  const pool=AI_SKILLS[key]||AI_SKILLS.default;
+  const existing=[...document.querySelectorAll('#tagsWrap .tag')].map(t=>t.firstChild.textContent.trim().toLowerCase());
+  const available=pool.filter(s=>!existing.includes(s.toLowerCase()));
+  const sec=document.getElementById('suggSection');
+  const list=document.getElementById('suggList');
+  sec.style.display='block';
+  list.innerHTML=available.slice(0,8).map(s=>`<button class="tag-add" onclick="addSugg(this)">+ ${s}</button>`).join('');
+  toast('✨ Sugerencias de conocimientos actualizadas por IA');
+}
+
+function updateStep2Filters(){
+  const puesto=document.getElementById('puesto').value||'el puesto';
+  const provEl=document.getElementById('prov');
+  const poblEl=document.getElementById('pobl');
+  const estEl=document.getElementById('estudios');
+  const prov=provEl.options[provEl.selectedIndex]?.value||'provincia';
+  const pobl=poblEl.options[poblEl.selectedIndex]?.value||'población';
+  const est=estEl.options[estEl.selectedIndex]?.value||'estudios mínimos';
+  const fp=document.getElementById('filterProv');
+  const fb=document.getElementById('filterPobl');
+  const fe=document.getElementById('filterExp');
+  const fs=document.getElementById('filterEst');
+  if(fp) fp.textContent=`Cribar CVs por: Provincia (${prov})`;
+  if(fb) fb.textContent=`Cribar CVs por: Población (${pobl})`;
+  if(fe) fe.textContent=`Cribar CVs por: Experiencia similar en el puesto (${puesto})`;
+  if(fs) fs.textContent=`Cribar CVs por: Estudios mínimos (${est})`;
+}
+
+// ── Salary type
+function salBtn(el){
+  document.querySelectorAll('#salType button').forEach(b=>b.classList.remove('active'));
+  el.classList.add('active');
+}
+
+// ── Toggle
+function tog(el){ el.classList.toggle('on'); }
+
+// ── Tags
+function tagKeydown(e){
+  if(e.key==='Enter'||e.key===','){
+    e.preventDefault();
+    const v=e.target.value.trim();
+    if(v){ insertTag(v); e.target.value=''; }
+  }
+}
+function insertTag(text){
+  const w=document.getElementById('tagsWrap');
+  const inp=document.getElementById('tagIn');
+  const sp=document.createElement('span');
+  sp.className='tag';
+  sp.innerHTML=text+' <button class="tag-x" onclick="removeTag(this)">×</button>';
+  w.insertBefore(sp,inp);
+}
+function removeTag(btn){ btn.closest('.tag').remove(); }
+function addSugg(btn){
+  insertTag(btn.textContent.replace('+','').trim());
+  btn.remove();
+}
+
+// ── Languages
+function removeLang(btn){ btn.closest('.lang-tag').remove(); }
+function addLanguage(){
+  const v=prompt('Idioma y nivel (ej: Francés – B1):');
+  if(!v) return;
+  const c=document.getElementById('langTags');
+  const sp=document.createElement('span');
+  sp.className='lang-tag';
+  sp.innerHTML=v+' <button onclick="removeLang(this)">×</button>';
+  c.appendChild(sp);
+}
+
+// ── Questions
+function renum(container){
+  container.querySelectorAll('.q-card').forEach((c,i)=>{
+    c.querySelector('.q-num').textContent='Pregunta '+(i+1);
+  });
+}
+function delQ(btn){
+  const card=btn.closest('.q-card');
+  const cont=card.closest('.card');
+  card.remove(); renum(cont);
+}
+function addOpt(btn){
+  const opts=btn.previousElementSibling;
+  const d=document.createElement('div');
+  d.className='q-opt';
+  d.innerHTML='<input type="text" placeholder="Nueva opción"><button class="q-opt-del" onclick="delOpt(this)">×</button>';
+  opts.appendChild(d);
+}
+function delOpt(btn){ btn.closest('.q-opt').remove(); }
+
+function addSelQ(){
+  const c=document.getElementById('selQs');
+  const ab=c.querySelector('.add-q-btn');
+  const n=c.querySelectorAll('.q-card').length+1;
+  const d=document.createElement('div');
+  d.className='q-card';
+  d.innerHTML=`<div class="q-head"><span class="q-num">Pregunta ${n}</span><button class="q-del" onclick="delQ(this)">×</button></div>
+    <div class="ff"><label style="font-size:14px;font-weight:500">Pregunta</label><input type="text" placeholder="Escribe tu pregunta..."></div>
+    <div>
+      <div style="font-size:12px;color:var(--gray);margin-bottom:6px">Opciones de respuesta</div>
+      <div class="q-options">
+        <div class="q-opt"><input type="text" placeholder="Opción A"><button class="q-opt-del" onclick="delOpt(this)">×</button></div>
+        <div class="q-opt"><input type="text" placeholder="Opción B"><button class="q-opt-del" onclick="delOpt(this)">×</button></div>
+      </div>
+      <button class="add-opt-btn" onclick="addOpt(this)">+ Añadir opción</button>
+    </div>`;
+  c.insertBefore(d,ab);
+}
+
+function addOpenQ(){
+  const c=document.getElementById('openQs');
+  const ab=c.querySelector('.add-q-btn');
+  const n=c.querySelectorAll('.q-card').length+1;
+  const d=document.createElement('div');
+  d.className='q-card';
+  d.innerHTML=`<div class="q-head"><span class="q-num">Pregunta ${n}</span><button class="q-del" onclick="delQ(this)">×</button></div>
+    <div class="ff"><label style="font-size:14px;font-weight:500">Pregunta</label><input type="text" placeholder="Escribe tu pregunta abierta..."></div>`;
+  c.insertBefore(d,ab);
+}
+
+// ── Actions
+function saveExit(){
+  if(confirm('¿Deseas guardar el borrador y salir?'))
+    toast('Borrador guardado correctamente');
+}
+function preview(){ toast('Vista previa disponible tras completar todos los pasos'); }
+
+function publish(){
+  const title = document.getElementById('puesto').value || 'Desarrollador/a Full Stack';
+  const prov  = document.getElementById('prov').options[document.getElementById('prov').selectedIndex]?.text || 'Madrid';
+  const pobl  = document.getElementById('pobl').options[document.getElementById('pobl').selectedIndex]?.text || 'Madrid';
+  const loc   = (prov && prov!=='Selecciona') ? `${pobl}, ${prov}` : 'Madrid, Madrid';
+  const today = new Date().toLocaleDateString('es-ES',{day:'numeric',month:'short',year:'numeric'});
+
+  document.getElementById('newOfferTitle').textContent = title;
+  document.getElementById('newOfferLoc').textContent   = loc;
+  document.getElementById('newOfferDate').textContent  = today;
+  document.getElementById('bannerTitle').textContent   = title;
+
+  window._offerTitle = title;
+  window._offerLoc   = loc;
+
+  document.getElementById('listado').classList.add('active');
+  document.querySelector('.header').style.display = 'none';
+  document.querySelector('.main').style.display   = 'none';
+  window.scrollTo({top:0,behavior:'smooth'});
+
+  const card = document.getElementById('newOfferCard');
+  card.scrollIntoView({behavior:'smooth', block:'center'});
+
+  // Make offer title clickable → inscritos
+  setTimeout(()=>{
+    const t=document.getElementById('newOfferTitle');
+    t.style.cursor='pointer';
+    t.style.color='var(--primary)';
+    t.onclick=()=>goToInscritos(window._offerTitle, window._offerLoc);
+  }, 200);
+}
+
+// ── INSCRITOS DATA ──
+const CANDS=[
+  {name:'Manuel González',tags:['tag 1','tag 2','tag 3'],time:'hace 3 min',loc:"L'Hospitalet, Barcelona",locSub:'(Sin distancia)',studies:'Diplomatura',exp:'+7 años',nota:'25/30',notaClass:'nota-verde',match:93,matchClass:'alto',
+   summary:['+7 años de experiencia en el puesto','Titulación universitaria obtenida en 2008','Amplia experiencia en el área de conocimiento requerida'],
+   criteria:[true,true,true,true,true,true,true]},
+  {name:'Laura Martínez',tags:['tag 1','tag 2','tag 3'],time:'hace 3 min',loc:"L'Hospitalet, Barcelona",locSub:'(Sin distancia)',studies:'Diplomatura',exp:'+7 años',nota:'25/30',notaClass:'nota-verde',match:85,matchClass:'alto',
+   summary:['Experiencia de 5 años en puesto similar','Formación específica en el área requerida','Cursos de especialización recientes'],
+   criteria:[true,true,null,true,true,true,true]},
+  {name:'Ricardo Fernández',tags:['tag 1','tag 2','tag 3'],time:'hace 3 min',loc:"L'Hospitalet, Barcelona",locSub:'(Sin distancia)',studies:'Diplomatura',exp:'+7 años',nota:'25/30',notaClass:'nota-verde',match:78,matchClass:'medio',
+   summary:['Formación en el área de la oferta','Experiencia en proyectos nacionales e internacionales','Conocimientos técnicos valorados'],
+   criteria:[true,null,true,true,true,true,true]},
+  {name:'Sergio Pérez',tags:['tag 1','tag 2','tag 3'],time:'hace 3 min',loc:"L'Hospitalet, Barcelona",locSub:'(Sin distancia)',studies:'Diplomatura',exp:'+7 años',nota:'25/30',notaClass:'nota-verde',match:72,matchClass:'medio',
+   summary:['Profesional con 4 años de experiencia en el sector','Formación complementaria en el área','Disponibilidad inmediata'],
+   criteria:[true,true,true,true,false,null,false]},
+  {name:'Marta Rodríguez',tags:['tag 1','tag 2','tag 3'],time:'hace 3 min',loc:"L'Hospitalet, Barcelona",locSub:'(Sin distancia)',studies:'Diplomatura',exp:'+7 años',nota:'29/30',notaClass:'nota-verde',match:66,matchClass:'medio',
+   summary:['Experiencia local, en proceso de ampliar a otros entornos','Reside cerca del puesto de trabajo','Buena capacidad de adaptación'],
+   criteria:[true,true,null,false,null,true,true]},
+  {name:'Alejandro Sánchez',tags:['tag 1','tag 2','tag 3'],time:'hace 3 min',loc:"L'Hospitalet, Barcelona",locSub:'(Sin distancia)',studies:'Diplomatura',exp:'+7 años',nota:'25/30',notaClass:'nota-verde',match:58,matchClass:'bajo',
+   summary:['3 años de experiencia en tareas relacionadas','Perfil en desarrollo, con interés en la especialización','Sin experiencia en algunos requisitos clave'],
+   criteria:[true,true,null,null,false,false,false]},
+  {name:'Carmen López',tags:['tag 1','tag 2','tag 3'],time:'hace 3 min',loc:"L'Hospitalet, Barcelona",locSub:'(Sin distancia)',studies:'Diplomatura',exp:'+7 años',nota:'25/30',notaClass:'nota-verde',match:52,matchClass:'bajo',
+   summary:['Experiencia básica en el área','Estudios finalizados recientemente','Disponibilidad inmediata y actitud proactiva'],
+   criteria:[false,true,null,null,false,null,true]},
+  {name:'David García',tags:['tag 1','tag 2','tag 3'],time:'hace 3 min',loc:"L'Hospitalet, Barcelona",locSub:'(Sin distancia)',studies:'Diplomatura',exp:'+7 años',nota:'25/30',notaClass:'nota-verde',match:44,matchClass:'bajo',
+   summary:['1 año de experiencia en el sector','Sin formación específica en algunos requisitos','Interés en seguir formándose'],
+   criteria:[false,null,null,false,false,null,true]},
+  {name:'Isabel Fernández',tags:['tag 1','tag 2','tag 3'],time:'hace 5 min',loc:"L'Hospitalet, Barcelona",locSub:'(Sin distancia)',studies:'Diplomatura',exp:'+7 años',nota:'25/30',notaClass:'nota-verde',match:38,matchClass:'bajo',
+   summary:['Perfil orientado a otras áreas, con interés en el cambio','Estudios universitarios en ADE','Disponible para jornada completa'],
+   criteria:[false,null,null,null,false,null,false]},
+  {name:'Javier Torres',tags:['tag 1','tag 2','tag 3'],time:'hace 5 min',loc:"L'Hospitalet, Barcelona",locSub:'(Sin distancia)',studies:'Diplomatura',exp:'+7 años',nota:'25/30',notaClass:'nota-verde',match:35,matchClass:'bajo',
+   summary:['Recién graduado con ganas de aprender','Sin experiencia profesional reseñable','Residente en Barcelona'],
+   criteria:[false,null,null,null,null,false,true]},
+  {name:'Elena Ruiz',tags:['tag 1','tag 2','tag 3'],time:'hace 1 h',loc:"L'Hospitalet, Barcelona",locSub:'(Sin distancia)',studies:'Diplomatura',exp:'+7 años',nota:'25/30',notaClass:'nota-verde',match:62,matchClass:'medio',
+   summary:['Profesional autónoma con 6 años de experiencia','Formación continua en el sector','Dispone de medios propios'],
+   criteria:[true,true,true,null,true,true,false]},
+  {name:'Pablo Jiménez',tags:['tag 1','tag 2','tag 3'],time:'hace 1 h',loc:"L'Hospitalet, Barcelona",locSub:'(Sin distancia)',studies:'Diplomatura',exp:'+7 años',nota:'25/30',notaClass:'nota-verde',match:55,matchClass:'bajo',
+   summary:['Experiencia en logística y operaciones','Perfil técnico con base sólida','Sin experiencia en algunas áreas específicas'],
+   criteria:[true,false,null,false,null,true,true]},
+  {name:'Daniel Peris',tags:['tag 1','tag 2','tag 3'],time:'hace 3 min',loc:"L'Hospitalet, Barcelona",locSub:'(Sin distancia)',studies:'Diplomatura',exp:'+7 años',nota:'25/30',notaClass:'nota-verde',match:80,matchClass:'alto',
+   summary:['8 años de experiencia en el puesto','Certificaciones y formación vigentes','Conocimiento del entorno local y nacional'],
+   criteria:[true,true,true,true,null,true,true]},
+  {name:'Ana Moreno',tags:['tag 1','tag 2','tag 3'],time:'hace 3 min',loc:"L'Hospitalet, Barcelona",locSub:'(Sin distancia)',studies:'Diplomatura',exp:'+7 años',nota:'25/30',notaClass:'nota-verde',match:47,matchClass:'bajo',
+   summary:['Experiencia básica en el sector','Interés en obtener formación adicional','Sin experiencia en algunos requisitos clave'],
+   criteria:[true,null,false,null,false,false,null]},
+  {name:'Antonia Carmona',tags:['tag 1','tag 2','tag 3'],time:'hace 3 min',loc:"L'Hospitalet, Barcelona",locSub:'(Sin distancia)',studies:'Diplomatura',exp:'+7 años',nota:'25/30',notaClass:'nota-verde',match:69,matchClass:'medio',
+   summary:['5 años de experiencia en el sector','Formación técnica actualizada','Reside a 10 km del puesto de trabajo'],
+   criteria:[true,true,true,true,null,false,true]},
+];
+
+const CRIT_LABELS=[
+  'Experiencia en el puesto: mínimo 2 años',
+  'Población: Barcelona',
+  'Vehículo propio',
+  'Carné C+E',
+  'Transporte de material inflamable',
+  'Conducción de vehículos de gran tonelaje',
+  'Estudios mínimos: Bachillerato',
+];
+
+function renderNormalTable(){
+  const tbody=document.getElementById('tbodyNormal');
+  tbody.innerHTML=CANDS.map(c=>`
+    <div class="cand-card">
+      <div class="hl-cand-row">
+        <div><input type="checkbox" style="accent-color:#0B4DD0;width:14px;height:14px;margin-top:2px"></div>
+        <div>
+          <div class="cand-name-link">${c.name}</div>
+          <div class="cand-job-title">${window._offerJobTitle||''}</div>
+          <div class="cand-tag-row">${c.tags.map(t=>`<span class="cand-tag-chip">${t}</span>`).join('')}</div>
+        </div>
+        <div class="cand-time">${c.time}</div>
+        <div><div class="cand-loc-main">${c.loc}</div><div class="cand-loc-sub">${c.locSub}</div></div>
+        <div>${c.studies}</div>
+        <div>${c.exp}</div>
+        <div><span class="nota-badge ${c.notaClass}">Nota: ${c.nota}</span></div>
+      </div>
+    </div>`).join('');
+}
+
+function renderSkeletonTable(){
+  const tbody=document.getElementById('tbodySkeleton');
+  tbody.innerHTML=CANDS.map(c=>`
+    <div class="cand-card">
+      <div class="hl-cand-row">
+        <div><input type="checkbox" style="accent-color:#0B4DD0;width:14px;height:14px;margin-top:2px"></div>
+        <div>
+          <div class="cand-name-link">${c.name}</div>
+          <div class="cand-job-title">${window._offerJobTitle||''}</div>
+          <div class="cand-tag-row">${c.tags.map(t=>`<span class="cand-tag-chip">${t}</span>`).join('')}</div>
+        </div>
+        <div class="cand-time">${c.time}</div>
+        <div><div class="cand-loc-main">${c.loc}</div><div class="cand-loc-sub">${c.locSub}</div></div>
+        <div>${c.studies}</div>
+        <div>${c.exp}</div>
+        <div><span class="nota-badge ${c.notaClass}">Nota: ${c.nota}</span></div>
+      </div>
+      <div class="hl-eval-section">
+        <div style="background:#F7F7F9;border-radius:10px;padding:14px 16px;display:flex;gap:0;align-items:flex-start">
+          <div style="flex:0 0 140px;padding-right:16px;border-right:1px solid #EFEFF1;display:flex;flex-direction:column;gap:8px">
+            <span class="skel" style="width:50px;height:10px;display:block;border-radius:3px"></span>
+            <span class="skel" style="width:90px;height:20px;display:block;border-radius:10px"></span>
+            <span class="skel" style="width:70px;height:10px;display:block;border-radius:3px;margin-top:8px"></span>
+            <span class="skel" style="width:100px;height:24px;display:block;border-radius:6px"></span>
+          </div>
+          <div style="flex:1;padding:0 16px;border-right:1px solid #EFEFF1;display:flex;flex-direction:column;gap:8px">
+            <span class="skel" style="width:75%;height:11px;display:block;border-radius:3px"></span>
+            <span class="skel" style="width:60%;height:11px;display:block;border-radius:3px"></span>
+            <span class="skel" style="width:70%;height:11px;display:block;border-radius:3px"></span>
+          </div>
+          <div style="flex:1;padding-left:16px;display:flex;flex-direction:column;gap:8px">
+            <span class="skel" style="width:80%;height:11px;display:block;border-radius:3px"></span>
+            <span class="skel" style="width:65%;height:11px;display:block;border-radius:3px"></span>
+            <span class="skel" style="width:72%;height:11px;display:block;border-radius:3px"></span>
+          </div>
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+function encajeMeta(pct){
+  if(pct>=85) return {label:'Encaje excelente',color:'#2E7D32',bg:'#E8F5E9'};
+  if(pct>=70) return {label:'Encaje bueno',    color:'#388E3C',bg:'#F1F8E9'};
+  if(pct>=50) return {label:'Encaje medio',    color:'#FF8F00',bg:'#FFF8E1'};
+  return            {label:'Encaje bajo',      color:'#E53935',bg:'#FFEBEE'};
+}
+
+function makeRing(pct){
+  const r=5, cx=8, cy=8, size=16;
+  const circ=+(2*Math.PI*r).toFixed(2);
+  const offset=+(circ*(1-pct/100)).toFixed(2);
+  return `<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" style="display:block;flex-shrink:0">
+    <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="#D5EDFF" stroke-width="2"/>
+    <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="#0B4DD0" stroke-width="2"
+      stroke-dasharray="${circ}" stroke-dashoffset="${offset}"
+      stroke-linecap="round" transform="rotate(-90 ${cx} ${cy})"/>
+  </svg>`;
+}
+
+function critIcon(val){
+  if(val===true)  return {icon:'assets/icon-match.svg',      label:'Cumple',           color:'#2E7D32'};
+  if(val===false) return {icon:'assets/icon-No-match.svg',   label:'No cumple',        color:'#E53935'};
+  return                 {icon:'assets/icon-doubt-match.svg',label:'No se menciona',   color:'#5E6061'};
+}
+
+function renderCritItem(lbl, val){
+  const {icon, label} = critIcon(val);
+  return `<div style="display:flex;align-items:flex-start;gap:6px;margin-bottom:7px">
+    <img src="${icon}" width="14" height="14" alt="${label}" style="flex-shrink:0;margin-top:1px">
+    <span style="font-size:12px;color:#2D3133;line-height:16px">${lbl}</span>
+  </div>`;
+}
+
+function calcAjuste(criteria, numLabels){
+  const vals = Array.from({length: numLabels}, (_,i) => criteria[i] !== undefined ? criteria[i] : null);
+  const score = vals.reduce((s, v) => s + (v === true ? 1 : 0), 0);
+  return Math.max(0, Math.round((score / numLabels) * 100));
+}
+
+function renderHLTable(){
+  const container=document.getElementById('tbodyHL');
+  const labels=(window._configuredReqs&&window._configuredReqs.length)?window._configuredReqs:CRIT_LABELS;
+  const half=Math.ceil(labels.length/2);
+  const sorted=[...CANDS].sort((a,b)=>calcAjuste(b.criteria,labels.length)-calcAjuste(a.criteria,labels.length));
+  container.innerHTML=sorted.map(c=>{
+    const match=calcAjuste(c.criteria,labels.length);
+    const em=encajeMeta(match);
+    const crit=labels.map((_,i)=>c.criteria[i]!==undefined?c.criteria[i]:null);
+    const col2=labels.slice(0,half).map((lbl,i)=>renderCritItem(lbl,crit[i])).join('');
+    const col3=labels.slice(half).map((lbl,i)=>renderCritItem(lbl,crit[half+i])).join('');
+    return `
+    <div class="hl-cand-card">
+      <div class="hl-cand-row">
+        <div><input type="checkbox" style="accent-color:#0B4DD0;width:14px;height:14px;margin-top:2px"></div>
+        <div>
+          <div class="cand-name-link">${c.name}</div>
+          <div class="cand-job-title">${window._offerJobTitle||''}</div>
+          <div class="cand-tag-row">${c.tags.map(t=>`<span class="cand-tag-chip">${t}</span>`).join('')}</div>
+        </div>
+        <div class="cand-time">${c.time}</div>
+        <div><div class="cand-loc-main">${c.loc}</div><div class="cand-loc-sub">${c.locSub}</div></div>
+        <div>${c.studies}</div>
+        <div>${c.exp}</div>
+        <div><span class="nota-badge ${c.notaClass}">Nota: ${c.nota}</span></div>
+      </div>
+      <div class="hl-eval-section">
+        <div style="background:#F7F7F9;border-radius:10px;padding:36px 16px 14px 16px;display:flex;gap:0;align-items:flex-start;position:relative">
+          <img src="assets/badge-IA.svg" alt="IA" style="position:absolute;top:0;right:0;display:block;pointer-events:none">
+
+          <!-- COL 1: Ajuste + Fuentes -->
+          <div style="flex:1 1 0;min-width:0;padding-right:16px;display:flex;flex-direction:column;gap:12px">
+            <div>
+              <div style="font-size:10px;font-weight:600;color:#74727E;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">Ajuste</div>
+              <div style="display:inline-flex;align-items:center;gap:8px;background:rgba(11,77,208,0.08);border-radius:20px;padding:6px 12px 6px 6px">
+                ${makeRing(match)}
+                <span style="font-size:15px;font-weight:800;color:#0B4DD0">${match}%</span>
+                <span style="font-size:11px;font-weight:600;color:#0B4DD0">${em.label}</span>
+              </div>
+            </div>
+            <div>
+              <div style="font-size:10px;font-weight:600;color:#74727E;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">Fuentes</div>
+              <div style="font-size:11px;color:#0B4DD0;background:#fff;border-radius:6px;padding:4px 8px;display:inline-flex;align-items:center;margin-bottom:4px">
+                CV de InfoJobs
+              </div>
+              <div style="font-size:11px;color:#0B4DD0;background:#fff;border-radius:6px;padding:4px 8px;display:inline-flex;align-items:center">
+                CV personal PDF
+              </div>
+            </div>
+          </div>
+
+          <!-- COL 2: criterios primera mitad -->
+          <div style="flex:1 1 0;min-width:0;padding:0 16px">
+            ${col2}
+          </div>
+
+          <!-- COL 3: criterios segunda mitad -->
+          <div style="flex:1 1 0;min-width:0;padding-left:16px">
+            ${col3}
+          </div>
+
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function goToInscritos(title,loc){
+  window._offerJobTitle = title || document.getElementById('puesto')?.value || '';
+  document.getElementById('listado').classList.remove('active');
+  const page=document.getElementById('inscritos-page');
+  page.style.display='block';
+  const h1=document.getElementById('insTitleH1');
+  h1.childNodes[0].textContent=(title||'Desarrollador/a Full Stack')+' ';
+  document.getElementById('insMeta').textContent=(loc||'Madrid, Madrid')+' | 21 sep 2026 | Caduca en: 90 días';
+  document.getElementById('prevaBanner').style.display='flex';
+  document.getElementById('evalAjuste').style.display='none';
+  document.getElementById('btnOcultarIA').style.display='none';
+  renderNormalTable();
+  document.getElementById('tableNormal').style.display='block';
+  document.getElementById('tableSkeleton').style.display='none';
+  document.getElementById('tableHL').style.display='none';
+  window.scrollTo({top:0,behavior:'smooth'});
+  setTimeout(openHLModal,2000);
+}
+
+function makeReqItem(text, imp, idx){
+  const n = idx ?? document.getElementById('reqList').querySelectorAll('.req-item').length;
+  const d = document.createElement('div');
+  d.className = 'req-item';
+  d.innerHTML = `
+    <div class="req-input-row">
+      <input class="req-text" type="text" value="${text.replace(/"/g,'&quot;')}">
+      <button class="req-del-btn" onclick="this.closest('.req-item').remove()"><img src="assets/icon-delete.svg" width="32" height="32" alt="eliminar" style="display:block"></button>
+    </div>
+    <div class="req-radios">
+      <label class="req-radio"><input type="radio" name="rqd${n}" ${imp!==false?'checked':''}> imprescindible</label>
+      <label class="req-radio"><input type="radio" name="rqd${n}" ${imp===false?'checked':''}> valorable</label>
+    </div>`;
+  return d;
+}
+
+function openHLModal(){
+  const list = document.getElementById('reqList');
+  list.innerHTML = '';
+
+  // 1. Conocimientos tags → imprescindible (highest priority)
+  const tags = [...document.querySelectorAll('#tagsWrap .tag')]
+    .map(t => t.firstChild.textContent.trim()).filter(Boolean);
+
+  // 2. Ubicación del puesto
+  const locItems = [];
+  const provEl = document.getElementById('prov') || document.getElementById('filterProv');
+  const poblEl = document.getElementById('pobl') || document.getElementById('filterPobl');
+  const locCity = poblEl?.value || provEl?.value || window._offerLoc || '';
+  if(locCity && locCity !== '' && locCity !== 'Selecciona'){
+    const cityName = locCity.split(',')[0].trim();
+    locItems.push({text: `Ubicación: ${cityName}`, imp: true});
+  }
+
+  // 3. Experiencia mínima
+  const expItems = [];
+  const expEl = document.getElementById('exp') || document.getElementById('filterExp');
+  const expVal = expEl?.value || expEl?.options?.[expEl?.selectedIndex]?.value || '';
+  if(expVal && expVal !== '' && expVal !== 'Selecciona' && expVal !== 'Sin experiencia'){
+    expItems.push({text: `Experiencia mínima: ${expVal}`, imp: true});
+  }
+
+  // 4. Parse descripción: extraer ítems relevantes de todas las secciones
+  const descText = document.getElementById('desc')?.value || '';
+  const descReqs = [];
+  const skipSections = /^(se ofrece|ofrecemos|beneficios|condiciones|salario|jornada|contrato)/i;
+  let currentSection = '';
+  for(const rawLine of descText.split('\n')){
+    const l = rawLine.trim();
+    if(!l) continue;
+    // Detectar encabezado de sección
+    if(/^[A-ZÁÉÍÓÚÜÑ][^•\-*\n]{2,50}:$/.test(l)){
+      currentSection = l.toLowerCase();
+      continue;
+    }
+    // Saltar secciones no relevantes para requisitos
+    if(skipSections.test(currentSection)) continue;
+    // Extraer bullet: •, -, *, o línea corta sin símbolo
+    const clean = l.replace(/^[•\-\*]\s*/, '').trim();
+    if(!clean || clean.length < 8 || clean.length > 120) continue;
+    // Saltar líneas que parecen párrafos largos (más de 10 palabras sin ser un requisito)
+    const words = clean.split(/\s+/).length;
+    if(words > 12 && !l.startsWith('•') && !l.startsWith('-') && !l.startsWith('*')) continue;
+    if(!descReqs.includes(clean)) descReqs.push(clean);
+  }
+
+  // 5. Estudios mínimos
+  const estItems = [];
+  const estEl = document.getElementById('estudios');
+  const est = estEl?.options?.[estEl?.selectedIndex]?.value;
+  if(est && est !== '' && est !== 'Selecciona'){
+    estItems.push({text: `Estudios mínimos: ${est}`, imp: true});
+  }
+
+  // 6. Build combined list (max 10): tags primero, luego ubicación, experiencia, bullets desc, estudios
+  const all = [];
+  tags.forEach(t => all.push({text: t, imp: true}));
+  locItems.forEach(r => all.push(r));
+  expItems.forEach(r => all.push(r));
+  descReqs.forEach(r => all.push({text: r, imp: true}));
+  estItems.forEach(r => all.push(r));
+
+  // Fallback si el formulario está vacío
+  if(all.length === 0){
+    all.push({text:'Experiencia en el puesto: mínimo 2 años', imp:true});
+    all.push({text:'Conocimientos técnicos del puesto', imp:true});
+    all.push({text:'Ubicación: Barcelona', imp:true});
+  }
+
+  all.slice(0, 10).forEach((it, i) => list.appendChild(makeReqItem(it.text, it.imp, i)));
+
+  document.getElementById('hlModal').classList.remove('hidden');
+}
+
+function finalizarHL(){
+  // Guardar los requisitos configurados para usarlos en el listado
+  window._configuredReqs = [...document.querySelectorAll('#reqList .req-item')]
+    .map(item => item.querySelector('.req-text')?.value?.trim())
+    .filter(Boolean);
+  if(!window._configuredReqs.length) window._configuredReqs = CRIT_LABELS.slice();
+
+  document.getElementById('hlModal').classList.add('hidden');
+  document.getElementById('prevaBanner').style.display='none';
+  document.getElementById('tableNormal').style.display='none';
+  document.getElementById('tableHL').style.display='none';
+  renderSkeletonTable();
+  document.getElementById('tableSkeleton').style.display='block';
+  document.getElementById('btnOcultarIA').style.display='inline-flex';
+  setTimeout(()=>{
+    document.getElementById('tableSkeleton').style.display='none';
+    renderHLTable();
+    document.getElementById('tableHL').style.display='block';
+    document.getElementById('evalAjuste').style.display='block';
+  },3000);
+}
+
+function selSource(btn){
+  btn.closest('.sources-btns').querySelectorAll('.source-option').forEach(b=>b.classList.remove('sel'));
+  btn.classList.add('sel');
+}
+
+function addReq(){
+  const item = makeReqItem('', true);
+  item.querySelector('.req-text').placeholder = 'Escribe un requisito...';
+  document.getElementById('reqList').appendChild(item);
+  item.querySelector('.req-text').focus();
+}
+
+function selInsTab(el){
+  document.querySelectorAll('.ins-tab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+}
+
+function ocultarComparativa(){
+  const btn = document.getElementById('btnOcultarIA');
+  const sections = document.querySelectorAll('#tbodyHL .hl-eval-section');
+  const isVisible = btn.dataset.state !== 'hidden';
+
+  if(isVisible){
+    sections.forEach(s => s.style.display='none');
+    btn.textContent = 'Mostrar Comparativa IA';
+    btn.dataset.state = 'hidden';
+  } else {
+    sections.forEach(s => s.style.display='');
+    btn.textContent = 'Ocultar Comparativa IA';
+    btn.dataset.state = '';
+  }
+}
+
+function backToListado(){
+  document.getElementById('inscritos-page').style.display='none';
+  document.getElementById('listado').classList.add('active');
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function showForm(){
+  document.getElementById('listado').classList.remove('active');
+  document.querySelector('.header').style.display = '';
+  document.querySelector('.main').style.display   = '';
+  // Reset al paso 1
+  go(1);
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function selectTab(el){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+}
+
+function selectPage(el){
+  document.querySelectorAll('.page-btn').forEach(b=>b.classList.remove('active'));
+  el.classList.add('active');
+}
+</script>
+
+<!-- INSCRITOS PAGE -->
+<div id="inscritos-page" style="display:none">
+
+  <nav class="nav-header">
+    <div class="nav-logo"><img src="assets/logo-infojobs-reduced.svg" alt="IJ"></div>
+    <div class="nav-links">
+      <a class="nav-link" href="#" onclick="return false">Inicio</a>
+      <a class="nav-link active" href="#" onclick="return false">Tus ofertas y CVs</a>
+      <a class="nav-link" href="#" onclick="return false">Buscador de profesionales</a>
+      <a class="nav-link" href="#" onclick="return false">Productos y ahorro</a>
+      <a class="nav-link" href="#" onclick="return false">Estadísticas</a>
+    </div>
+    <div class="nav-right">
+      <button class="nav-publish-btn">Publicar una oferta</button>
+      <div class="nav-avatar">AC</div>
+    </div>
+  </nav>
+
+  <div class="ins-header-wrap">
+    <a class="ins-back" onclick="backToListado()">← Volver a tus ofertas</a>
+    <div class="ins-top-row">
+      <div class="ins-title-group">
+        <h1 id="insTitleH1">Desarrollador/a Full Stack <button class="more-btn">⋮</button></h1>
+        <div class="ins-meta-line" id="insMeta">Madrid, Madrid | 21 sep 2026 | Caduca en: 90 días</div>
+      </div>
+      <div class="ins-stats-row">
+        <div class="ins-stat">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M1 8s2.5-5 7-5 7 5 7 5-2.5 5-7 5-7-5-7-5z"/><circle cx="8" cy="8" r="2"/></svg>
+          500
+        </div>
+        <div class="ins-stat">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3"><circle cx="8" cy="5.5" r="2.5"/><path d="M2.5 13c0-2.76 2.46-5 5.5-5s5.5 2.24 5.5 5" stroke-linecap="round"/></svg>
+          90
+        </div>
+        <div class="ins-stat">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M2 12L6 7l3 3 3-5 2 2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          10%
+        </div>
+        <a class="mas-info-lnk" href="#" onclick="return false">Más info</a>
+      </div>
+    </div>
+    <div class="preva-banner" id="prevaBanner">
+      <span class="preva-banner-icon">✨</span>
+      <div class="preva-banner-text">Activa <strong>PreViA</strong>, el asistente IA de InfoJobs que evaluará aquellas candidaturas que mejor encajen con tu oferta para agilizar el proceso de selección. <a onclick="return false">Tú decides siempre quién pasa al siguiente paso del proceso.</a></div>
+      <button class="preva-activate-btn" onclick="openHLModal()">✨ Activar evaluación PreViA</button>
+    </div>
+    <div class="ins-tabs-bar">
+      <div class="ins-tab active" onclick="selInsTab(this)">Sin valorar (15)</div>
+      <div class="ins-tab" onclick="selInsTab(this)">Preseleccionados (0)</div>
+      <div class="ins-tab" onclick="selInsTab(this)">Entrevista (0)</div>
+      <div class="ins-tab" onclick="selInsTab(this)">Contratados (0)</div>
+      <div class="ins-tab" onclick="selInsTab(this)">Descartados (0)</div>
+    </div>
+  </div>
+
+  <div class="ins-content">
+    <div class="ins-sidebar">
+      <div class="sidebar-header">Filtros <button class="sidebar-collapse">«</button></div>
+      <div>
+        <div class="sb-field-label">Buscador por palabra clave <span class="sb-info-icon">ⓘ</span></div>
+        <input type="text" class="sb-search" placeholder="Nombre, puesto, etiqueta">
+      </div>
+      <div class="sb-divider"></div>
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <div class="sb-toggle-row">Ocultar CVs vistos<label class="sb-toggle"><input type="checkbox"><span class="sb-toggle-slider"></span></label></div>
+        <div class="sb-toggle-row">Mostrar solo CVs desempleados<label class="sb-toggle"><input type="checkbox"><span class="sb-toggle-slider"></span></label></div>
+      </div>
+      <div class="sb-divider"></div>
+      <div>
+        <div class="sb-section-title">Experiencia laboral</div>
+        <div class="sb-range-label">Años de experiencia mínima en puesto</div>
+        <input type="range" min="0" max="10" value="0" class="sb-range">
+        <div class="sb-ticks"><span>0</span><span>1</span><span>2</span><span>3</span><span>5</span><span>+10</span></div>
+        <div class="sb-range-label">Años de experiencia total <span class="sb-info-icon">ⓘ</span></div>
+        <input type="range" min="0" max="10" value="0" class="sb-range">
+        <div class="sb-ticks"><span>0</span><span>1</span><span>2</span><span>3</span><span>5</span><span>+10</span></div>
+      </div>
+      <div class="sb-divider"></div>
+      <div>
+        <div class="sb-section-title">Ubicación</div>
+        <div class="sb-sub-label">País</div>
+        <label class="sb-check"><input type="checkbox" checked> España (8)</label>
+        <label class="sb-check"><input type="checkbox"> Alemania (1)</label>
+        <div class="sb-sub-label" style="margin-top:8px">Provincias (España)</div>
+        <label class="sb-check"><input type="checkbox" checked> Madrid (6)</label>
+        <label class="sb-check"><input type="checkbox"> Barcelona (1)</label>
+        <label class="sb-check"><input type="checkbox"> Valencia (1)</label>
+      </div>
+      <div class="sb-divider"></div>
+      <div id="evalAjuste" style="display:none">
+        <div class="sb-section-title">Evaluación y ajuste</div>
+        <div class="sb-range-label">Nota de preguntas de selección</div>
+        <div class="score-pills">
+          <span class="score-pill todas">Todas</span>
+          <span class="score-pill alta">Alta</span>
+          <span class="score-pill media">Media</span>
+          <span class="score-pill baja">Baja</span>
+        </div>
+        <div class="sb-range-label">% de ajuste con la oferta</div>
+        <input type="range" min="0" max="100" value="0" class="sb-range">
+        <div class="sb-ticks"><span>0%</span><span>20%</span><span>40%</span><span>60%</span><span>80%</span><span>100%</span></div>
+        <div class="sb-range-label" style="margin-top:4px">Encaje evaluación PreViA</div>
+        <label class="sb-check"><input type="checkbox"> Encaje excelente</label>
+        <label class="sb-check"><input type="checkbox"> Encaje Bueno</label>
+        <label class="sb-check"><input type="checkbox"> Encaje Medio</label>
+        <label class="sb-check"><input type="checkbox"> Encaje Bajo</label>
+        <label class="sb-check"><input type="checkbox"> Encaje insuficiente</label>
+      </div>
+      <div class="sb-divider"></div>
+      <div>
+        <div class="sb-section-title">Formación y conocimientos</div>
+        <div class="sb-sub-label">Nivel de estudios</div>
+        <label class="sb-check"><input type="checkbox"> Bachillerato (16)</label>
+        <label class="sb-check"><input type="checkbox"> Licenciatura (6)</label>
+        <label class="sb-check"><input type="checkbox" checked> Grado universitario (6)</label>
+        <label class="sb-check"><input type="checkbox"> Ciclo Formativo Grado Medio (2)</label>
+        <label class="sb-check"><input type="checkbox"> Ciclo Formativo Grado Superior (1)</label>
+        <label class="sb-check"><input type="checkbox"> Diplomatura (1)</label>
+        <div class="sb-more">+3 más</div>
+      </div>
+      <div class="sb-divider"></div>
+      <div>
+        <div class="sb-section-title">Idiomas</div>
+        <label class="sb-check"><input type="checkbox" checked> Español (20)</label>
+        <label class="sb-check"><input type="checkbox"> Inglés (5)</label>
+        <label class="sb-check"><input type="checkbox"> Italiano (4)</label>
+      </div>
+      <div class="sb-divider"></div>
+      <div>
+        <div class="sb-section-title">Carné de conducir</div>
+        <label class="sb-check"><input type="checkbox" checked> Sin permiso (20)</label>
+        <label class="sb-check"><input type="checkbox"> A1 (5)</label>
+        <label class="sb-check"><input type="checkbox"> A (4)</label>
+        <label class="sb-check"><input type="checkbox" checked> B (4)</label>
+        <label class="sb-check"><input type="checkbox"> C (4)</label>
+        <div class="sb-more">+3 más</div>
+      </div>
+    </div>
+
+    <div class="ins-main">
+      <div class="table-bar">
+        <div class="table-bar-left">
+          <span class="cvs-count">CVs: 15 de 15</span>
+          <button class="tbar-btn">
+            <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.3"><circle cx="7" cy="7" r="5"/><path d="M5 7h4M7 5v4" stroke-linecap="round"/></svg>
+            Descarte automático
+          </button>
+          <button class="tbar-btn">
+            <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M2 4h10M4 7h6M6 10h2" stroke-linecap="round"/></svg>
+            Ordenación InfoJobs
+          </button>
+          <button class="tbar-btn" id="btnOcultarIA" style="display:none" onclick="ocultarComparativa()">Ocultar Comparativa IA</button>
+        </div>
+        <div class="table-bar-right">
+          <span class="show-label">Mostrar:</span>
+          <select class="show-sel"><option>20</option><option>50</option><option>100</option></select>
+          <button class="view-btn">☰</button>
+          <button class="view-btn on">⊞</button>
+        </div>
+      </div>
+
+      <div id="tableNormal">
+        <div class="hl-grid-header">
+          <div><input type="checkbox" style="accent-color:#0B4DD0;width:14px;height:14px"></div>
+          <div>Nombre</div><div>CV subido</div><div>Ubicación</div><div>Estudios</div><div>Experiencia en el puesto</div><div>Preguntas selección</div>
+        </div>
+        <div id="tbodyNormal"></div>
+      </div>
+
+      <div id="tableSkeleton" style="display:none">
+        <div class="hl-grid-header">
+          <div><input type="checkbox" style="accent-color:#0B4DD0;width:14px;height:14px"></div>
+          <div>Nombre</div><div>CV subido</div><div>Ubicación</div><div>Estudios</div><div>Experiencia en el puesto</div><div>Preguntas selección</div>
+        </div>
+        <div id="tbodySkeleton"></div>
+      </div>
+
+      <div id="tableHL" style="display:none">
+        <div class="hl-grid-header">
+          <div><input type="checkbox" style="accent-color:#0B4DD0;width:14px;height:14px"></div>
+          <div>Nombre</div><div>CV subido</div><div>Ubicación</div><div>Estudios</div><div>Experiencia en el puesto</div><div>Preguntas selección</div>
+        </div>
+        <div id="tbodyHL"></div>
+      </div>
+
+      <div style="display:flex;align-items:center;justify-content:center;gap:4px;margin-top:24px">
+        <button class="page-btn" disabled>← Anterior</button>
+        <button class="page-btn active">1</button>
+        <button class="page-btn">2</button><button class="page-btn">3</button><button class="page-btn">4</button>
+        <button class="page-btn">5</button><button class="page-btn">6</button><button class="page-btn">7</button>
+        <button class="page-btn">8</button><button class="page-btn">9</button>
+        <button class="page-btn">Siguiente →</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- HIGHLIGHTS MODAL -->
+<div class="modal-overlay hidden" id="hlModal">
+  <div class="hl-modal">
+    <div class="hl-modal-header">
+      <h2>Evaluación de candidaturas con IA: Configuración</h2>
+    </div>
+    <div class="hl-modal-body">
+      <div class="hl-info-box">
+        <div class="hl-info-box-title">Compara tu oferta y el candidato con Inteligencia Artificial <span class="ia-chip">IA</span></div>
+        <p>Confirma los <strong>requisitos y habilidades</strong> técnicas más importantes de tu oferta, la IA <strong>revisará los CVs</strong> y devolverá en el listado de inscritos una valoración de los candidatos basada en los requisitos de la oferta.</p>
+      </div>
+      <!-- BLOQUE REQUISITOS -->
+      <div style="border:1px solid rgba(12,12,12,0.16);border-radius:24px;padding:20px;margin-bottom:12px">
+        <div class="hl-section-title">
+          1 Requisitos y conocimientos técnicos de la oferta <span style="font-weight:400;font-size:12px;color:#74727E">(Máximo 10)</span>
+          <button class="add-req-link" onclick="addReq()">+ Añadir requisito</button>
+        </div>
+        <div class="hl-warn" id="warnBox">
+          <img src="assets/icon-alert.png" width="40" height="40" alt="!" style="flex-shrink:0">
+          <span>Evita evaluar cualquier tipo de información personal o discriminatoria (edad, género, nacionalidad, raza, ideología, religión, estereotipos, datos bancarios, circunstancias personales, DNI…etc).</span>
+          <button class="hl-warn-close" onclick="document.getElementById('warnBox').style.display='none'">×</button>
+        </div>
+        <div class="req-list" id="reqList">
+          <!-- populated dynamically by openHLModal() from form data -->
+        </div>
+      </div>
+
+      <!-- BLOQUE FUENTES -->
+      <div style="border:1px solid rgba(12,12,12,0.16);border-radius:24px;padding:20px">
+        <div class="hl-section-title" style="margin-top:0">2 Fuentes de información</div>
+        <div class="sources-desc">La IA utilizará las siguientes fuentes del candidato para generar la comparativa.</div>
+        <div class="sources-btns">
+          <div class="source-option sel" style="cursor:default;pointer-events:none">CV de InfoJobs <span>Perfil profesional e historial</span></div>
+          <div class="source-option sel" style="cursor:default;pointer-events:none">CV personal en PDF <span>Currículum adjunto por el candidato</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="hl-modal-footer">
+      <button class="finalizar-btn" onclick="finalizarHL()">Finalizar</button>
+    </div>
+  </div>
+</div>
+</body>
+</html>
