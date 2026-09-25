@@ -1,0 +1,6 @@
+# Ignorar todo excepto el prototipo y sus assets
+*
+!.gitignore
+!infojobs-publicar-oferta.html
+!assets/
+!assets/**
