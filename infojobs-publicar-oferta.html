@@ -1637,7 +1637,7 @@ function renderHLTable(){
   const container=document.getElementById('tbodyHL');
   const labels=(window._configuredReqs&&window._configuredReqs.length)?window._configuredReqs:CRIT_LABELS;
   const half=Math.ceil(labels.length/2);
-  const sorted=guaranteeAllLevels([...CANDS].sort((a,b)=>calcAjuste(b.criteria,labels.length)-calcAjuste(a.criteria,labels.length)),labels);
+  const sorted=[...CANDS].sort((a,b)=>calcAjuste(b.criteria,labels.length)-calcAjuste(a.criteria,labels.length));
   container.innerHTML=sorted.map(c=>{
     const match=calcAjuste(c.criteria,labels.length);
     const em=encajeMeta(match);
@@ -1660,7 +1660,7 @@ function renderHLTable(){
         <div><span class="nota-badge ${c.notaClass}">Nota: ${c.nota}</span></div>
       </div>
       <div class="hl-eval-section">
-        <div style="background:#ffffff;border:1px solid #D4D4DA;border-radius:10px;padding:36px 16px 14px 16px;display:flex;gap:0;align-items:flex-start;position:relative">
+        <div style="background:#ffffff;border:1px solid #D4D4DA;border-radius:24px;padding:36px 16px 14px 16px;display:flex;gap:0;align-items:flex-start;position:relative">
           <img src="assets/badge-IA.svg" alt="IA" style="position:absolute;top:0;right:0;display:block;pointer-events:none">
 
           <!-- COL 1: Ajuste + Fuentes -->
