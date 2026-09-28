@@ -1585,22 +1585,32 @@ function renderSkeletonTable(){
 }
 
 function encajeMeta(pct){
-  if(pct>=85) return {label:'Encaje excelente',color:'#2E7D32',bg:'#E8F5E9'};
-  if(pct>=70) return {label:'Encaje bueno',    color:'#388E3C',bg:'#F1F8E9'};
-  if(pct>=50) return {label:'Encaje medio',    color:'#FF8F00',bg:'#FFF8E1'};
-  return            {label:'Encaje bajo',      color:'#E53935',bg:'#FFEBEE'};
+  if(pct>=85) return {label:'Encaje excelente', color:'#378701', badgeBg:'rgba(55,135,1,0.08)'};
+  if(pct>=70) return {label:'Encaje bueno',     color:'#378701', badgeBg:'rgba(55,135,1,0.08)'};
+  if(pct>=50) return {label:'Encaje medio',     color:'#F6B000', badgeBg:'rgba(246,176,0,0.08)'};
+  return             {label:'Encaje bajo',      color:'#D9382C', badgeBg:'rgba(217,56,44,0.08)'};
 }
 
-function makeRing(pct){
+function makeRing(pct, color){
+  const c = color || '#378701';
   const r=5, cx=8, cy=8, size=16;
   const circ=+(2*Math.PI*r).toFixed(2);
   const offset=+(circ*(1-pct/100)).toFixed(2);
   return `<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" style="display:block;flex-shrink:0">
-    <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="#D5EDFF" stroke-width="2"/>
-    <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="#0B4DD0" stroke-width="2"
+    <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${c}" stroke-width="2" opacity="0.2"/>
+    <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${c}" stroke-width="2"
       stroke-dasharray="${circ}" stroke-dashoffset="${offset}"
       stroke-linecap="round" transform="rotate(-90 ${cx} ${cy})"/>
   </svg>`;
+}
+
+function guaranteeAllLevels(sorted, labels){
+  const getLevel = c => { const p=calcAjuste(c.criteria,labels.length); return p>=85?0:p>=70?1:p>=50?2:3; };
+  const pinned=[], seenLvl=new Set();
+  for(const c of sorted){ const l=getLevel(c); if(!seenLvl.has(l)){pinned.push(c);seenLvl.add(l);} if(seenLvl.size===4) break; }
+  pinned.sort((a,b)=>getLevel(a)-getLevel(b));
+  const pinnedSet=new Set(pinned);
+  return [...pinned, ...sorted.filter(c=>!pinnedSet.has(c))];
 }
 
 function critIcon(val){
@@ -1627,7 +1637,7 @@ function renderHLTable(){
   const container=document.getElementById('tbodyHL');
   const labels=(window._configuredReqs&&window._configuredReqs.length)?window._configuredReqs:CRIT_LABELS;
   const half=Math.ceil(labels.length/2);
-  const sorted=[...CANDS].sort((a,b)=>calcAjuste(b.criteria,labels.length)-calcAjuste(a.criteria,labels.length));
+  const sorted=guaranteeAllLevels([...CANDS].sort((a,b)=>calcAjuste(b.criteria,labels.length)-calcAjuste(a.criteria,labels.length)),labels);
   container.innerHTML=sorted.map(c=>{
     const match=calcAjuste(c.criteria,labels.length);
     const em=encajeMeta(match);
@@ -1650,17 +1660,17 @@ function renderHLTable(){
         <div><span class="nota-badge ${c.notaClass}">Nota: ${c.nota}</span></div>
       </div>
       <div class="hl-eval-section">
-        <div style="background:#F7F7F9;border-radius:10px;padding:36px 16px 14px 16px;display:flex;gap:0;align-items:flex-start;position:relative">
+        <div style="background:#ffffff;border:1px solid #D4D4DA;border-radius:10px;padding:36px 16px 14px 16px;display:flex;gap:0;align-items:flex-start;position:relative">
           <img src="assets/badge-IA.svg" alt="IA" style="position:absolute;top:0;right:0;display:block;pointer-events:none">
 
           <!-- COL 1: Ajuste + Fuentes -->
           <div style="flex:1 1 0;min-width:0;padding-right:16px;display:flex;flex-direction:column;gap:12px">
             <div>
               <div style="font-size:10px;font-weight:600;color:#74727E;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">Ajuste</div>
-              <div style="display:inline-flex;align-items:center;gap:8px;background:rgba(11,77,208,0.08);border-radius:20px;padding:6px 12px 6px 6px">
-                ${makeRing(match)}
-                <span style="font-size:15px;font-weight:800;color:#0B4DD0">${match}%</span>
-                <span style="font-size:11px;font-weight:600;color:#0B4DD0">${em.label}</span>
+              <div style="display:inline-flex;align-items:center;gap:8px;background:${em.badgeBg};border-radius:20px;padding:6px 12px 6px 6px">
+                ${makeRing(match, em.color)}
+                <span style="font-size:15px;font-weight:800;color:${em.color}">${match}%</span>
+                <span style="font-size:11px;font-weight:600;color:${em.color}">${em.label}</span>
               </div>
             </div>
             <div>
