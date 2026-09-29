@@ -1657,7 +1657,14 @@ function renderHLTable(){
         <div><div class="cand-loc-main">${c.loc}</div><div class="cand-loc-sub">${c.locSub}</div></div>
         <div>${c.studies}</div>
         <div>${c.exp}</div>
-        <div><span class="nota-badge ${c.notaClass}">Nota: ${c.nota}</span></div>
+        <div>
+          <span class="nota-badge ${c.notaClass}">Nota: ${c.nota}</span>
+          <div class="hl-row-encaje" style="display:none;margin-top:8px;align-items:center;gap:6px;background:${em.badgeBg};border-radius:20px;padding:4px 10px 4px 4px;width:fit-content">
+            ${makeRing(match, em.color)}
+            <span style="font-size:13px;font-weight:800;color:${em.color}">${match}%</span>
+            <span style="font-size:11px;font-weight:600;color:${em.color}">${em.label}</span>
+          </div>
+        </div>
       </div>
       <div class="hl-eval-section">
         <div style="background:#F7F7F9;border-radius:24px;padding:36px 16px 14px 16px;display:flex;gap:0;align-items:flex-start;position:relative">
@@ -1852,14 +1859,17 @@ function selInsTab(el){
 function ocultarComparativa(){
   const btn = document.getElementById('btnOcultarIA');
   const sections = document.querySelectorAll('#tbodyHL .hl-eval-section');
+  const badges = document.querySelectorAll('#tbodyHL .hl-row-encaje');
   const isVisible = btn.dataset.state !== 'hidden';
 
   if(isVisible){
     sections.forEach(s => s.style.display='none');
+    badges.forEach(b => b.style.display='inline-flex');
     btn.textContent = 'Mostrar Comparativa IA';
     btn.dataset.state = 'hidden';
   } else {
     sections.forEach(s => s.style.display='');
+    badges.forEach(b => b.style.display='none');
     btn.textContent = 'Ocultar Comparativa IA';
     btn.dataset.state = '';
   }
