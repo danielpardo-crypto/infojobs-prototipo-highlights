@@ -384,7 +384,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text','Helvetica Neue'
 .hl-grid-header>div{font-size:11px;font-weight:600;color:#74727E;padding:0 8px}
 .hl-grid-header>div:first-child{padding:0 4px}
 .hl-cand-card,.cand-card{background:#fff;border:1px solid #EFEFF1;border-radius:16px;margin-bottom:8px;overflow:hidden}
-.hl-cand-row{display:grid;grid-template-columns:30px minmax(180px,2fr) 90px 160px 110px 130px 120px;padding:12px 16px;gap:0;align-items:start}
+.hl-cand-row{display:grid;grid-template-columns:30px minmax(180px,2fr) 90px 160px 110px 130px minmax(120px,1fr);padding:12px 16px;gap:0;align-items:start}
 .hl-cand-row>div{padding:0 8px;font-size:13px;color:#2D3133}
 .hl-cand-row>div:first-child{padding:0 4px;padding-top:2px}
 .hl-eval-section{padding:0 16px 12px 16px}
@@ -1657,11 +1657,11 @@ function renderHLTable(){
         <div><div class="cand-loc-main">${c.loc}</div><div class="cand-loc-sub">${c.locSub}</div></div>
         <div>${c.studies}</div>
         <div>${c.exp}</div>
-        <div>
+        <div style="display:flex;align-items:flex-start;gap:8px;flex-wrap:wrap">
           <span class="nota-badge ${c.notaClass}">Nota: ${c.nota}</span>
-          <div class="hl-row-encaje" style="display:none;margin-top:8px;align-items:center;gap:6px;background:${em.badgeBg};border-radius:20px;padding:4px 10px 4px 4px;width:fit-content">
+          <div class="hl-row-encaje" style="display:none;align-items:center;gap:5px;background:${em.badgeBg};border-radius:20px;padding:4px 10px 4px 4px;flex-shrink:0">
             ${makeRing(match, em.color)}
-            <span style="font-size:13px;font-weight:800;color:${em.color}">${match}%</span>
+            <span style="font-size:12px;font-weight:800;color:${em.color}">${match}%</span>
             <span style="font-size:11px;font-weight:600;color:${em.color}">${em.label}</span>
           </div>
         </div>
