@@ -1657,11 +1657,11 @@ function renderHLTable(){
         <div><div class="cand-loc-main">${c.loc}</div><div class="cand-loc-sub">${c.locSub}</div></div>
         <div>${c.studies}</div>
         <div>${c.exp}</div>
-        <div>
+        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px">
           <span class="nota-badge ${c.notaClass}">Nota: ${c.nota}</span>
-          <div class="hl-row-encaje" style="display:none;margin-top:8px;align-items:center;gap:6px;background:${em.badgeBg};border-radius:20px;padding:4px 10px 4px 4px;width:fit-content">
+          <div class="hl-row-encaje" style="display:none;align-items:center;gap:5px;background:${em.badgeBg};border-radius:20px;padding:4px 10px 4px 4px;white-space:nowrap">
             ${makeRing(match, em.color)}
-            <span style="font-size:13px;font-weight:800;color:${em.color}">${match}%</span>
+            <span style="font-size:12px;font-weight:800;color:${em.color}">${match}%</span>
             <span style="font-size:11px;font-weight:600;color:${em.color}">${em.label}</span>
           </div>
         </div>
