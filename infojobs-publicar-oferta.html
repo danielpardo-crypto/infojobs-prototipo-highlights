@@ -360,6 +360,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text','Helvetica Neue'
 .nota-badge{display:inline-block;font-size:12px;font-weight:700;padding:3px 8px;border-radius:4px;white-space:nowrap}
 .nota-verde{background:#E8F5E9;color:#2E7D32}
 .nota-naranja{background:#FFF3E0;color:#E65100}
+.nota-amarilla{background:#FFF8E1;color:#F57F17}
 .nota-roja{background:#FFEBEE;color:#C62828}
 .ajuste-val{font-size:20px;font-weight:700;line-height:1;display:block}
 .ajuste-val.alto{color:#2E7D32}
@@ -380,11 +381,11 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text','Helvetica Neue'
 @keyframes shimmer{0%{background-position:100% 0}100%{background-position:-100% 0}}
 .skel-circle{border-radius:50%!important}
 .hl-expand-skel{background:#F8FAFF;padding:10px 16px 14px 48px;display:flex;gap:24px}
-.hl-grid-header{display:grid;grid-template-columns:30px minmax(180px,2fr) 90px 160px 110px 130px 120px;padding:8px 16px;border-bottom:2px solid #EFEFF1;gap:0}
+.hl-grid-header{display:grid;grid-template-columns:30px repeat(6,1fr);padding:8px 16px;border-bottom:2px solid #EFEFF1;gap:0}
 .hl-grid-header>div{font-size:11px;font-weight:600;color:#74727E;padding:0 8px}
 .hl-grid-header>div:first-child{padding:0 4px}
 .hl-cand-card,.cand-card{background:#fff;border:1px solid #EFEFF1;border-radius:16px;margin-bottom:8px;overflow:hidden}
-.hl-cand-row{display:grid;grid-template-columns:30px minmax(180px,2fr) 90px 160px 110px 130px 120px;padding:12px 16px;gap:0;align-items:start}
+.hl-cand-row{display:grid;grid-template-columns:30px repeat(6,1fr);padding:12px 16px;gap:0;align-items:start}
 .hl-cand-row>div{padding:0 8px;font-size:13px;color:#2D3133}
 .hl-cand-row>div:first-child{padding:0 4px;padding-top:2px}
 .hl-eval-section{padding:0 16px 12px 16px}
@@ -424,6 +425,21 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text','Helvetica Neue'
 .hl-modal-footer{padding:14px 24px;border-top:1px solid #EFEFF1;display:flex;justify-content:flex-end;flex-shrink:0;background:#fff}
 .finalizar-btn{height:32px;padding:0 16px;background:#0B4DD0;color:#fff;border:none;border-radius:16px;font-size:13px;font-weight:600;font-family:inherit;cursor:pointer}
 .finalizar-btn:hover{background:#0940B8}
+
+/* ── SORT DROPDOWN ── */
+.sort-wrap{position:relative;display:inline-flex}
+.sort-dropdown{position:absolute;top:calc(100% + 6px);left:0;background:#fff;border:1px solid #E0E0E0;border-radius:8px;box-shadow:0 4px 20px rgba(0,0,0,.14);z-index:300;width:256px;padding:8px 0;display:none;overflow:hidden}
+.sort-dropdown.open{display:block}
+.sort-group-label{font-size:10px;font-weight:600;color:#74727E;text-transform:uppercase;letter-spacing:.8px;padding:10px 16px 4px;line-height:1}
+.sort-opt{display:flex;flex-direction:column;padding:9px 16px;font-size:14px;color:#2D3133;cursor:pointer;transition:background .1s;line-height:1.3}
+.sort-opt:hover{background:#F0F4FF}
+.sort-opt.active{background:#EBF2FF}
+.sort-opt.active .sort-opt-text{color:#0B4DD0;font-weight:600}
+.sort-opt-text{font-size:14px;color:#2D3133}
+.sort-opt.active .sort-opt-text{color:#0B4DD0}
+.sort-opt-sub{font-size:12px;color:#74727E;margin-top:2px}
+.sort-opt.active .sort-opt-sub{color:#0B4DD0}
+.sort-divider{height:1px;background:#EFEFF1;margin:4px 0}
 </style>
 </head>
 <body>
@@ -1466,50 +1482,51 @@ function publish(){
 }
 
 // ── INSCRITOS DATA ──
+// cvTime: minutos desde inscripción (para ordenar). studiesRank: nivel académico (1=mínimo … 9=máximo). expYears: años numéricos. notaNum: puntuación numérica.
 const CANDS=[
-  {name:'Manuel González',tags:['tag 1','tag 2','tag 3'],time:'hace 3 min',loc:"L'Hospitalet, Barcelona",locSub:'(Sin distancia)',studies:'Diplomatura',exp:'+7 años',nota:'25/30',notaClass:'nota-verde',match:93,matchClass:'alto',
+  {name:'Manuel González',tags:['tag 1','tag 2','tag 3'],time:'hace 3 min',cvTime:3,loc:"L'Hospitalet, Barcelona",locSub:'(0 km)',studies:'Licenciatura',studiesRank:8,exp:'+7 años',expYears:7,nota:'28/30',notaNum:28,notaClass:'nota-verde',match:93,matchClass:'alto',
    summary:['+7 años de experiencia en el puesto','Titulación universitaria obtenida en 2008','Amplia experiencia en el área de conocimiento requerida'],
    criteria:[true,true,true,true,true,true,true]},
-  {name:'Laura Martínez',tags:['tag 1','tag 2','tag 3'],time:'hace 3 min',loc:"L'Hospitalet, Barcelona",locSub:'(Sin distancia)',studies:'Diplomatura',exp:'+7 años',nota:'25/30',notaClass:'nota-verde',match:85,matchClass:'alto',
+  {name:'Laura Martínez',tags:['tag 1','tag 2','tag 3'],time:'hace 5 min',cvTime:5,loc:'Barcelona, Barcelona',locSub:'(2 km)',studies:'Máster',studiesRank:9,exp:'5 años',expYears:5,nota:'25/30',notaNum:25,notaClass:'nota-verde',match:85,matchClass:'alto',
    summary:['Experiencia de 5 años en puesto similar','Formación específica en el área requerida','Cursos de especialización recientes'],
    criteria:[true,true,null,true,true,true,true]},
-  {name:'Ricardo Fernández',tags:['tag 1','tag 2','tag 3'],time:'hace 3 min',loc:"L'Hospitalet, Barcelona",locSub:'(Sin distancia)',studies:'Diplomatura',exp:'+7 años',nota:'25/30',notaClass:'nota-verde',match:78,matchClass:'medio',
+  {name:'Ricardo Fernández',tags:['tag 1','tag 2','tag 3'],time:'hace 8 min',cvTime:8,loc:'Badalona, Barcelona',locSub:'(8 km)',studies:'Grado',studiesRank:7,exp:'+3 años',expYears:3,nota:'22/30',notaNum:22,notaClass:'nota-amarilla',match:78,matchClass:'medio',
    summary:['Formación en el área de la oferta','Experiencia en proyectos nacionales e internacionales','Conocimientos técnicos valorados'],
    criteria:[true,null,true,true,true,true,true]},
-  {name:'Sergio Pérez',tags:['tag 1','tag 2','tag 3'],time:'hace 3 min',loc:"L'Hospitalet, Barcelona",locSub:'(Sin distancia)',studies:'Diplomatura',exp:'+7 años',nota:'25/30',notaClass:'nota-verde',match:72,matchClass:'medio',
+  {name:'Sergio Pérez',tags:['tag 1','tag 2','tag 3'],time:'hace 12 min',cvTime:12,loc:'Cornellà, Barcelona',locSub:'(6 km)',studies:'FP Superior',studiesRank:6,exp:'4 años',expYears:4,nota:'18/30',notaNum:18,notaClass:'nota-amarilla',match:72,matchClass:'medio',
    summary:['Profesional con 4 años de experiencia en el sector','Formación complementaria en el área','Disponibilidad inmediata'],
    criteria:[true,true,true,true,false,null,false]},
-  {name:'Marta Rodríguez',tags:['tag 1','tag 2','tag 3'],time:'hace 3 min',loc:"L'Hospitalet, Barcelona",locSub:'(Sin distancia)',studies:'Diplomatura',exp:'+7 años',nota:'29/30',notaClass:'nota-verde',match:66,matchClass:'medio',
+  {name:'Marta Rodríguez',tags:['tag 1','tag 2','tag 3'],time:'hace 20 min',cvTime:20,loc:'Sant Boi, Barcelona',locSub:'(14 km)',studies:'Diplomatura',studiesRank:5,exp:'6 años',expYears:6,nota:'29/30',notaNum:29,notaClass:'nota-verde',match:66,matchClass:'medio',
    summary:['Experiencia local, en proceso de ampliar a otros entornos','Reside cerca del puesto de trabajo','Buena capacidad de adaptación'],
    criteria:[true,true,null,false,null,true,true]},
-  {name:'Alejandro Sánchez',tags:['tag 1','tag 2','tag 3'],time:'hace 3 min',loc:"L'Hospitalet, Barcelona",locSub:'(Sin distancia)',studies:'Diplomatura',exp:'+7 años',nota:'25/30',notaClass:'nota-verde',match:58,matchClass:'bajo',
+  {name:'Alejandro Sánchez',tags:['tag 1','tag 2','tag 3'],time:'hace 35 min',cvTime:35,loc:'Terrassa, Barcelona',locSub:'(28 km)',studies:'Bachillerato',studiesRank:4,exp:'2 años',expYears:2,nota:'15/30',notaNum:15,notaClass:'nota-roja',match:58,matchClass:'bajo',
    summary:['3 años de experiencia en tareas relacionadas','Perfil en desarrollo, con interés en la especialización','Sin experiencia en algunos requisitos clave'],
    criteria:[true,true,null,null,false,false,false]},
-  {name:'Carmen López',tags:['tag 1','tag 2','tag 3'],time:'hace 3 min',loc:"L'Hospitalet, Barcelona",locSub:'(Sin distancia)',studies:'Diplomatura',exp:'+7 años',nota:'25/30',notaClass:'nota-verde',match:52,matchClass:'bajo',
+  {name:'Carmen López',tags:['tag 1','tag 2','tag 3'],time:'hace 1 h',cvTime:60,loc:'Sabadell, Barcelona',locSub:'(22 km)',studies:'FP Medio',studiesRank:3,exp:'1 año',expYears:1,nota:'20/30',notaNum:20,notaClass:'nota-amarilla',match:52,matchClass:'bajo',
    summary:['Experiencia básica en el área','Estudios finalizados recientemente','Disponibilidad inmediata y actitud proactiva'],
    criteria:[false,true,null,null,false,null,true]},
-  {name:'David García',tags:['tag 1','tag 2','tag 3'],time:'hace 3 min',loc:"L'Hospitalet, Barcelona",locSub:'(Sin distancia)',studies:'Diplomatura',exp:'+7 años',nota:'25/30',notaClass:'nota-verde',match:44,matchClass:'bajo',
+  {name:'David García',tags:['tag 1','tag 2','tag 3'],time:'hace 2 h',cvTime:120,loc:'Mataró, Barcelona',locSub:'(30 km)',studies:'Grado',studiesRank:7,exp:'+2 años',expYears:2,nota:'12/30',notaNum:12,notaClass:'nota-roja',match:44,matchClass:'bajo',
    summary:['1 año de experiencia en el sector','Sin formación específica en algunos requisitos','Interés en seguir formándose'],
    criteria:[false,null,null,false,false,null,true]},
-  {name:'Isabel Fernández',tags:['tag 1','tag 2','tag 3'],time:'hace 5 min',loc:"L'Hospitalet, Barcelona",locSub:'(Sin distancia)',studies:'Diplomatura',exp:'+7 años',nota:'25/30',notaClass:'nota-verde',match:38,matchClass:'bajo',
+  {name:'Isabel Fernández',tags:['tag 1','tag 2','tag 3'],time:'hace 3 h',cvTime:180,loc:'Viladecans, Barcelona',locSub:'(10 km)',studies:'Licenciatura',studiesRank:8,exp:'Sin experiencia',expYears:0,nota:'10/30',notaNum:10,notaClass:'nota-roja',match:38,matchClass:'bajo',
    summary:['Perfil orientado a otras áreas, con interés en el cambio','Estudios universitarios en ADE','Disponible para jornada completa'],
    criteria:[false,null,null,null,false,null,false]},
-  {name:'Javier Torres',tags:['tag 1','tag 2','tag 3'],time:'hace 5 min',loc:"L'Hospitalet, Barcelona",locSub:'(Sin distancia)',studies:'Diplomatura',exp:'+7 años',nota:'25/30',notaClass:'nota-verde',match:35,matchClass:'bajo',
+  {name:'Javier Torres',tags:['tag 1','tag 2','tag 3'],time:'hace 5 h',cvTime:300,loc:'Granollers, Barcelona',locSub:'(35 km)',studies:'ESO',studiesRank:2,exp:'Sin experiencia',expYears:0,nota:'8/30',notaNum:8,notaClass:'nota-roja',match:35,matchClass:'bajo',
    summary:['Recién graduado con ganas de aprender','Sin experiencia profesional reseñable','Residente en Barcelona'],
    criteria:[false,null,null,null,null,false,true]},
-  {name:'Elena Ruiz',tags:['tag 1','tag 2','tag 3'],time:'hace 1 h',loc:"L'Hospitalet, Barcelona",locSub:'(Sin distancia)',studies:'Diplomatura',exp:'+7 años',nota:'25/30',notaClass:'nota-verde',match:62,matchClass:'medio',
+  {name:'Elena Ruiz',tags:['tag 1','tag 2','tag 3'],time:'hace 6 h',cvTime:360,loc:'El Prat, Barcelona',locSub:'(5 km)',studies:'Máster',studiesRank:9,exp:'+5 años',expYears:5,nota:'24/30',notaNum:24,notaClass:'nota-verde',match:62,matchClass:'medio',
    summary:['Profesional autónoma con 6 años de experiencia','Formación continua en el sector','Dispone de medios propios'],
    criteria:[true,true,true,null,true,true,false]},
-  {name:'Pablo Jiménez',tags:['tag 1','tag 2','tag 3'],time:'hace 1 h',loc:"L'Hospitalet, Barcelona",locSub:'(Sin distancia)',studies:'Diplomatura',exp:'+7 años',nota:'25/30',notaClass:'nota-verde',match:55,matchClass:'bajo',
+  {name:'Pablo Jiménez',tags:['tag 1','tag 2','tag 3'],time:'hace 8 h',cvTime:480,loc:'Mollet, Barcelona',locSub:'(18 km)',studies:'FP Superior',studiesRank:6,exp:'3 años',expYears:3,nota:'16/30',notaNum:16,notaClass:'nota-roja',match:55,matchClass:'bajo',
    summary:['Experiencia en logística y operaciones','Perfil técnico con base sólida','Sin experiencia en algunas áreas específicas'],
    criteria:[true,false,null,false,null,true,true]},
-  {name:'Daniel Peris',tags:['tag 1','tag 2','tag 3'],time:'hace 3 min',loc:"L'Hospitalet, Barcelona",locSub:'(Sin distancia)',studies:'Diplomatura',exp:'+7 años',nota:'25/30',notaClass:'nota-verde',match:80,matchClass:'alto',
+  {name:'Daniel Peris',tags:['tag 1','tag 2','tag 3'],time:'hace 10 h',cvTime:600,loc:"L'Hospitalet, Barcelona",locSub:'(0 km)',studies:'Diplomatura',studiesRank:5,exp:'+8 años',expYears:8,nota:'27/30',notaNum:27,notaClass:'nota-verde',match:80,matchClass:'alto',
    summary:['8 años de experiencia en el puesto','Certificaciones y formación vigentes','Conocimiento del entorno local y nacional'],
    criteria:[true,true,true,true,null,true,true]},
-  {name:'Ana Moreno',tags:['tag 1','tag 2','tag 3'],time:'hace 3 min',loc:"L'Hospitalet, Barcelona",locSub:'(Sin distancia)',studies:'Diplomatura',exp:'+7 años',nota:'25/30',notaClass:'nota-verde',match:47,matchClass:'bajo',
+  {name:'Ana Moreno',tags:['tag 1','tag 2','tag 3'],time:'hace 1 día',cvTime:1440,loc:'Gavà, Barcelona',locSub:'(12 km)',studies:'Bachillerato',studiesRank:4,exp:'1 año',expYears:1,nota:'14/30',notaNum:14,notaClass:'nota-roja',match:47,matchClass:'bajo',
    summary:['Experiencia básica en el sector','Interés en obtener formación adicional','Sin experiencia en algunos requisitos clave'],
    criteria:[true,null,false,null,false,false,null]},
-  {name:'Antonia Carmona',tags:['tag 1','tag 2','tag 3'],time:'hace 3 min',loc:"L'Hospitalet, Barcelona",locSub:'(Sin distancia)',studies:'Diplomatura',exp:'+7 años',nota:'25/30',notaClass:'nota-verde',match:69,matchClass:'medio',
+  {name:'Antonia Carmona',tags:['tag 1','tag 2','tag 3'],time:'hace 2 días',cvTime:2880,loc:'Castelldefels, Barcelona',locSub:'(20 km)',studies:'Grado',studiesRank:7,exp:'5 años',expYears:5,nota:'21/30',notaNum:21,notaClass:'nota-amarilla',match:69,matchClass:'medio',
    summary:['5 años de experiencia en el sector','Formación técnica actualizada','Reside a 10 km del puesto de trabajo'],
    criteria:[true,true,true,true,null,false,true]},
 ];
@@ -1524,9 +1541,77 @@ const CRIT_LABELS=[
   'Estudios mínimos: Bachillerato',
 ];
 
+// ── SORT STATE ──
+window._sortKey = 'match';
+window._sortDir = 'desc';
+
+const SORT_LABELS = {
+  default:      { desc:'Ordenación InfoJobs' },
+  match:        { desc:'Mayor encaje', asc:'Menor encaje' },
+  cvTime:       { asc:'Más recientes', desc:'Menos recientes' },
+  name:         { asc:'Nombre A - Z', desc:'Nombre Z - A' },
+  loc:          { asc:'Provincia A - Z', desc:'Provincia Z - A' },
+  notaNum:      { desc:'Mayor nota', asc:'Menor nota' },
+  studiesRank:  { desc:'Mas estudios', asc:'Menos estudios' },
+  expYears:     { desc:'Mas experiencia', asc:'Menos experiencia' },
+};
+
+function getSortedCands(){
+  const key=window._sortKey, dir=window._sortDir;
+  if(key==='default') return [...CANDS].sort((a,b)=>b.match-a.match);
+  return [...CANDS].sort((a,b)=>{
+    let va, vb;
+    if(key==='name'||key==='loc'){ va=a[key]||''; vb=b[key]||''; return dir==='asc'?va.localeCompare(vb):vb.localeCompare(va); }
+    va=a[key]??0; vb=b[key]??0;
+    return dir==='desc' ? vb-va : va-vb;
+  });
+}
+
+function toggleSortDropdown(e){
+  e.stopPropagation();
+  const dd=document.getElementById('sortDropdown');
+  dd.classList.toggle('open');
+}
+
+function resortHLDom(){
+  const container=document.getElementById('tbodyHL');
+  const cards=[...container.querySelectorAll('.hl-cand-card')];
+  const labels=(window._configuredReqs&&window._configuredReqs.length)?window._configuredReqs:CRIT_LABELS;
+  const sorted=(window._sortKey==='match'||window._sortKey==='default')
+    ? [...CANDS].sort((a,b)=> window._sortDir==='asc'
+        ? calcAjuste(a.criteria,labels.length)-calcAjuste(b.criteria,labels.length)
+        : calcAjuste(b.criteria,labels.length)-calcAjuste(a.criteria,labels.length))
+    : getSortedCands();
+  const nameToCard={};
+  cards.forEach(card=>{ nameToCard[card.dataset.candName]=card; });
+  sorted.forEach(c=>{ const card=nameToCard[c.name]; if(card) container.appendChild(card); });
+}
+
+function applySort(key, dir){
+  window._sortKey=key; window._sortDir=dir;
+  const lbl=SORT_LABELS[key]?.[dir]||'Ordenación InfoJobs';
+  document.getElementById('sortLabel').textContent=lbl;
+  // highlight active option
+  document.querySelectorAll('#sortDropdown .sort-opt').forEach(el=>{
+    const oc=el.getAttribute('onclick')||'';
+    el.classList.toggle('active', oc.includes(`'${key}'`) && oc.includes(`'${dir}'`));
+  });
+  document.getElementById('sortDropdown').classList.remove('open');
+  const hlVisible=document.getElementById('tableHL').style.display!=='none';
+  const skelVisible=document.getElementById('tableSkeleton').style.display!=='none';
+  // If HL table is visible and all comparativas are loaded → only re-sort DOM, don't re-render
+  if(hlVisible && window._hlAllLoaded){ resortHLDom(); return; }
+  if(hlVisible) renderHLTable();
+  else if(skelVisible) renderSkeletonTable();
+  else renderNormalTable();
+}
+
+// Close dropdown on outside click
+document.addEventListener('click', ()=>{ const dd=document.getElementById('sortDropdown'); if(dd) dd.classList.remove('open'); });
+
 function renderNormalTable(){
   const tbody=document.getElementById('tbodyNormal');
-  tbody.innerHTML=CANDS.map(c=>`
+  tbody.innerHTML=getSortedCands().map(c=>`
     <div class="cand-card">
       <div class="hl-cand-row">
         <div><input type="checkbox" style="accent-color:#0B4DD0;width:14px;height:14px;margin-top:2px"></div>
@@ -1546,7 +1631,7 @@ function renderNormalTable(){
 
 function renderSkeletonTable(){
   const tbody=document.getElementById('tbodySkeleton');
-  tbody.innerHTML=CANDS.map(c=>`
+  tbody.innerHTML=getSortedCands().map(c=>`
     <div class="cand-card">
       <div class="hl-cand-row">
         <div><input type="checkbox" style="accent-color:#0B4DD0;width:14px;height:14px;margin-top:2px"></div>
@@ -1633,19 +1718,104 @@ function calcAjuste(criteria, numLabels){
   return Math.max(0, Math.round((score / numLabels) * 100));
 }
 
+function makeHLEvalHTML(c, labels){
+  const half=Math.ceil(labels.length/2);
+  const match=calcAjuste(c.criteria,labels.length);
+  const em=encajeMeta(match);
+  const crit=labels.map((_,i)=>c.criteria[i]!==undefined?c.criteria[i]:null);
+  const col2=labels.slice(0,half).map((lbl,i)=>renderCritItem(lbl,crit[i])).join('');
+  const col3=labels.slice(half).map((lbl,i)=>renderCritItem(lbl,crit[half+i])).join('');
+  return `<div style="background:#F7F7F9;border-radius:24px;padding:36px 16px 14px 16px;display:flex;gap:0;align-items:flex-start;position:relative">
+    <img src="assets/badge-IA.svg" alt="IA" style="position:absolute;top:0;right:0;display:block;pointer-events:none">
+    <div style="flex:1 1 0;min-width:0;padding-right:16px;display:flex;flex-direction:column;justify-content:space-between;min-height:80px">
+      <div style="display:inline-flex;align-items:center;gap:8px;background:${em.badgeBg};border-radius:20px;padding:6px 12px 6px 6px;align-self:flex-start">
+        ${makeRing(match, em.color)}
+        <span style="font-size:15px;font-weight:800;color:${em.color}">${match}%</span>
+        <span style="font-size:11px;font-weight:600;color:${em.color}">${em.label}</span>
+      </div>
+      <div>
+        <div style="font-size:10px;font-weight:600;color:#74727E;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">Fuentes</div>
+        <div style="font-size:11px;color:#0B4DD0;background:#fff;border-radius:6px;padding:4px 8px;display:inline-flex;align-items:center;margin-bottom:4px">CV de InfoJobs</div>
+        <div style="font-size:11px;color:#0B4DD0;background:#fff;border-radius:6px;padding:4px 8px;display:inline-flex;align-items:center">CV personal PDF</div>
+      </div>
+    </div>
+    <div style="flex:1 1 0;min-width:0;padding:0 16px">${col2}</div>
+    <div style="flex:1 1 0;min-width:0;padding-left:16px">${col3}</div>
+  </div>`;
+}
+
+function makeHLSkelHTML(){
+  return `<div style="background:#F7F7F9;border-radius:10px;padding:14px 16px;display:flex;gap:0;align-items:flex-start">
+    <div style="flex:0 0 140px;padding-right:16px;border-right:1px solid #EFEFF1;display:flex;flex-direction:column;gap:8px">
+      <span class="skel" style="width:50px;height:10px;display:block;border-radius:3px"></span>
+      <span class="skel" style="width:90px;height:20px;display:block;border-radius:10px"></span>
+      <span class="skel" style="width:70px;height:10px;display:block;border-radius:3px;margin-top:8px"></span>
+      <span class="skel" style="width:100px;height:24px;display:block;border-radius:6px"></span>
+    </div>
+    <div style="flex:1;padding:0 16px;border-right:1px solid #EFEFF1;display:flex;flex-direction:column;gap:8px">
+      <span class="skel" style="width:75%;height:11px;display:block;border-radius:3px"></span>
+      <span class="skel" style="width:60%;height:11px;display:block;border-radius:3px"></span>
+      <span class="skel" style="width:70%;height:11px;display:block;border-radius:3px"></span>
+    </div>
+    <div style="flex:1;padding-left:16px;display:flex;flex-direction:column;gap:8px">
+      <span class="skel" style="width:80%;height:11px;display:block;border-radius:3px"></span>
+      <span class="skel" style="width:65%;height:11px;display:block;border-radius:3px"></span>
+      <span class="skel" style="width:72%;height:11px;display:block;border-radius:3px"></span>
+    </div>
+  </div>`;
+}
+
+// Sequential HL loader state
+window._hlLoadTimer = null;
+window._hlLoadIdx   = 0;
+window._hlSorted    = [];
+window._hlAllLoaded = false;
+
+function startHLSequentialLoad(sorted, labels){
+  if(window._hlLoadTimer) clearInterval(window._hlLoadTimer);
+  window._hlSorted = sorted;
+  window._hlLoadIdx = 0;
+  window._hlAllLoaded = false;
+
+  function revealNext(){
+    const cards = document.querySelectorAll('#tbodyHL .hl-cand-card');
+    const i = window._hlLoadIdx;
+    if(i >= cards.length){
+      clearInterval(window._hlLoadTimer);
+      window._hlLoadTimer=null;
+      window._hlAllLoaded=true;
+      return;
+    }
+    const evalSection = cards[i].querySelector('.hl-eval-section');
+    if(evalSection){
+      const c = window._hlSorted[i];
+      // Replace skeleton with real content (fade in). Badge stays hidden — only shows via ocultarComparativa.
+      evalSection.style.opacity='0';
+      evalSection.style.transition='opacity .4s ease';
+      evalSection.innerHTML = makeHLEvalHTML(c, labels);
+      requestAnimationFrame(()=>requestAnimationFrame(()=>{ evalSection.style.opacity='1'; }));
+    }
+    window._hlLoadIdx++;
+  }
+
+  revealNext();
+  window._hlLoadTimer = setInterval(revealNext, 2000);
+}
+
 function renderHLTable(){
   const container=document.getElementById('tbodyHL');
   const labels=(window._configuredReqs&&window._configuredReqs.length)?window._configuredReqs:CRIT_LABELS;
-  const half=Math.ceil(labels.length/2);
-  const sorted=[...CANDS].sort((a,b)=>calcAjuste(b.criteria,labels.length)-calcAjuste(a.criteria,labels.length));
+  const sorted = (window._sortKey==='match'||window._sortKey==='default')
+    ? [...CANDS].sort((a,b)=> window._sortDir==='asc'
+        ? calcAjuste(a.criteria,labels.length)-calcAjuste(b.criteria,labels.length)
+        : calcAjuste(b.criteria,labels.length)-calcAjuste(a.criteria,labels.length))
+    : getSortedCands();
+
   container.innerHTML=sorted.map(c=>{
     const match=calcAjuste(c.criteria,labels.length);
     const em=encajeMeta(match);
-    const crit=labels.map((_,i)=>c.criteria[i]!==undefined?c.criteria[i]:null);
-    const col2=labels.slice(0,half).map((lbl,i)=>renderCritItem(lbl,crit[i])).join('');
-    const col3=labels.slice(half).map((lbl,i)=>renderCritItem(lbl,crit[half+i])).join('');
     return `
-    <div class="hl-cand-card">
+    <div class="hl-cand-card" data-cand-name="${c.name.replace(/"/g,'&quot;')}">
       <div class="hl-cand-row">
         <div><input type="checkbox" style="accent-color:#0B4DD0;width:14px;height:14px;margin-top:2px"></div>
         <div>
@@ -1664,42 +1834,11 @@ function renderHLTable(){
         <div>${c.exp}</div>
         <div><span class="nota-badge ${c.notaClass}">Nota: ${c.nota}</span></div>
       </div>
-      <div class="hl-eval-section">
-        <div style="background:#F7F7F9;border-radius:24px;padding:36px 16px 14px 16px;display:flex;gap:0;align-items:flex-start;position:relative">
-          <img src="assets/badge-IA.svg" alt="IA" style="position:absolute;top:0;right:0;display:block;pointer-events:none">
-
-          <!-- COL 1: Ajuste (top) + Fuentes (bottom) -->
-          <div style="flex:1 1 0;min-width:0;padding-right:16px;display:flex;flex-direction:column;justify-content:space-between;min-height:80px">
-            <div style="display:inline-flex;align-items:center;gap:8px;background:${em.badgeBg};border-radius:20px;padding:6px 12px 6px 6px;align-self:flex-start">
-              ${makeRing(match, em.color)}
-              <span style="font-size:15px;font-weight:800;color:${em.color}">${match}%</span>
-              <span style="font-size:11px;font-weight:600;color:${em.color}">${em.label}</span>
-            </div>
-            <div>
-              <div style="font-size:10px;font-weight:600;color:#74727E;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">Fuentes</div>
-              <div style="font-size:11px;color:#0B4DD0;background:#fff;border-radius:6px;padding:4px 8px;display:inline-flex;align-items:center;margin-bottom:4px">
-                CV de InfoJobs
-              </div>
-              <div style="font-size:11px;color:#0B4DD0;background:#fff;border-radius:6px;padding:4px 8px;display:inline-flex;align-items:center">
-                CV personal PDF
-              </div>
-            </div>
-          </div>
-
-          <!-- COL 2: criterios primera mitad -->
-          <div style="flex:1 1 0;min-width:0;padding:0 16px">
-            ${col2}
-          </div>
-
-          <!-- COL 3: criterios segunda mitad -->
-          <div style="flex:1 1 0;min-width:0;padding-left:16px">
-            ${col3}
-          </div>
-
-        </div>
-      </div>
+      <div class="hl-eval-section" style="transition:opacity .4s ease">${makeHLSkelHTML()}</div>
     </div>`;
   }).join('');
+
+  startHLSequentialLoad(sorted, labels);
 }
 
 function goToInscritos(title,loc){
@@ -1856,18 +1995,27 @@ function selInsTab(el){
 
 function ocultarComparativa(){
   const btn = document.getElementById('btnOcultarIA');
-  const sections = document.querySelectorAll('#tbodyHL .hl-eval-section');
-  const badges = document.querySelectorAll('#tbodyHL .hl-row-encaje');
+  const cards = document.querySelectorAll('#tbodyHL .hl-cand-card');
   const isVisible = btn.dataset.state !== 'hidden';
 
   if(isVisible){
-    sections.forEach(s => s.style.display='none');
-    badges.forEach(b => b.style.display='inline-flex');
+    // Hide eval sections; show badge only on already-loaded rows (no skeleton spans inside)
+    cards.forEach((card, i) => {
+      const s = card.querySelector('.hl-eval-section');
+      const b = card.querySelector('.hl-row-encaje');
+      if(s) s.style.display='none';
+      // Only show badge if this row has been loaded (idx < _hlLoadIdx)
+      if(b && i < window._hlLoadIdx) b.style.display='inline-flex';
+    });
     btn.textContent = 'Mostrar Comparativa IA';
     btn.dataset.state = 'hidden';
   } else {
-    sections.forEach(s => s.style.display='');
-    badges.forEach(b => b.style.display='none');
+    cards.forEach(card => {
+      const s = card.querySelector('.hl-eval-section');
+      const b = card.querySelector('.hl-row-encaje');
+      if(s) s.style.display='';
+      if(b) b.style.display='none';
+    });
     btn.textContent = 'Ocultar Comparativa IA';
     btn.dataset.state = '';
   }
@@ -2046,10 +2194,47 @@ function selectPage(el){
             <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.3"><circle cx="7" cy="7" r="5"/><path d="M5 7h4M7 5v4" stroke-linecap="round"/></svg>
             Descarte automático
           </button>
-          <button class="tbar-btn">
-            <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M2 4h10M4 7h6M6 10h2" stroke-linecap="round"/></svg>
-            Ordenación InfoJobs
-          </button>
+          <div class="sort-wrap" id="sortWrap">
+            <button class="tbar-btn" id="btnSort" onclick="toggleSortDropdown(event)">
+              <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M2 4h10M4 7h6M6 10h2" stroke-linecap="round"/></svg>
+              <span id="sortLabel">Ordenación InfoJobs</span>
+            </button>
+            <div class="sort-dropdown" id="sortDropdown">
+              <div class="sort-group-label">Por defecto</div>
+              <div class="sort-opt active" id="sortOptDefault" onclick="applySort('default','desc')">
+                <span class="sort-opt-text">Ordenación InfoJobs:</span>
+                <span class="sort-opt-sub">Mayor nota + Mayor ajuste + Más reciente</span>
+              </div>
+              <div class="sort-divider"></div>
+              <div class="sort-group-label">Nivel de ajuste</div>
+              <div class="sort-opt" onclick="applySort('match','desc')"><span class="sort-opt-text">Mayor encaje</span></div>
+              <div class="sort-opt" onclick="applySort('match','asc')"><span class="sort-opt-text">Menor encaje</span></div>
+              <div class="sort-divider"></div>
+              <div class="sort-group-label">Fecha de inscripción</div>
+              <div class="sort-opt" onclick="applySort('cvTime','asc')"><span class="sort-opt-text">Más recientes</span></div>
+              <div class="sort-opt" onclick="applySort('cvTime','desc')"><span class="sort-opt-text">Menos recientes</span></div>
+              <div class="sort-divider"></div>
+              <div class="sort-group-label">Nombre</div>
+              <div class="sort-opt" onclick="applySort('name','asc')"><span class="sort-opt-text">Nombre de la A - Z</span></div>
+              <div class="sort-opt" onclick="applySort('name','desc')"><span class="sort-opt-text">Nombre de la Z - A</span></div>
+              <div class="sort-divider"></div>
+              <div class="sort-group-label">Ubicación</div>
+              <div class="sort-opt" onclick="applySort('loc','asc')"><span class="sort-opt-text">Provincia de la A - Z</span></div>
+              <div class="sort-opt" onclick="applySort('loc','desc')"><span class="sort-opt-text">Provincia de la Z - A</span></div>
+              <div class="sort-divider"></div>
+              <div class="sort-group-label">Preguntas de selección</div>
+              <div class="sort-opt" onclick="applySort('notaNum','desc')"><span class="sort-opt-text">Mayor nota</span></div>
+              <div class="sort-opt" onclick="applySort('notaNum','asc')"><span class="sort-opt-text">Menor nota</span></div>
+              <div class="sort-divider"></div>
+              <div class="sort-group-label">Nivel de estudios</div>
+              <div class="sort-opt" onclick="applySort('studiesRank','desc')"><span class="sort-opt-text">Mas estudios</span></div>
+              <div class="sort-opt" onclick="applySort('studiesRank','asc')"><span class="sort-opt-text">Menos estudios</span></div>
+              <div class="sort-divider"></div>
+              <div class="sort-group-label">Experiencia en el puesto</div>
+              <div class="sort-opt" onclick="applySort('expYears','desc')"><span class="sort-opt-text">Mas experiencia</span></div>
+              <div class="sort-opt" onclick="applySort('expYears','asc')"><span class="sort-opt-text">Menos experiencia</span></div>
+            </div>
+          </div>
           <button class="tbar-btn" id="btnOcultarIA" style="display:none" onclick="ocultarComparativa()">Ocultar Comparativa IA</button>
         </div>
         <div class="table-bar-right">
