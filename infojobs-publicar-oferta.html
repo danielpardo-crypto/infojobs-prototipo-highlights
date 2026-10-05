@@ -1606,8 +1606,8 @@ const CRIT_LABELS=[
 ];
 
 // ── SORT STATE ──
-window._sortKey = 'match';
-window._sortDir = 'desc';
+window._sortKey = 'cvTime';
+window._sortDir = 'asc';
 
 const SORT_LABELS = {
   default:      { desc:'Ordenación InfoJobs' },
@@ -1643,7 +1643,7 @@ function resortHLDom(){
   const container=document.getElementById('tbodyHL');
   const cards=[...container.querySelectorAll('.hl-cand-card')];
   const labels=(window._configuredReqs&&window._configuredReqs.length)?window._configuredReqs:CRIT_LABELS;
-  const sorted=(window._sortKey==='match'||window._sortKey==='default')
+  const sorted=window._sortKey==='match'
     ? [...CANDS].sort((a,b)=> window._sortDir==='asc'
         ? calcAjuste(getEffectiveCriteria(a,labels),labels.length)-calcAjuste(getEffectiveCriteria(b,labels),labels.length)
         : calcAjuste(getEffectiveCriteria(b,labels),labels.length)-calcAjuste(getEffectiveCriteria(a,labels),labels.length))
@@ -1936,7 +1936,7 @@ function makeHLLoadingHTML(){
 function renderHLTable(mode='loaded'){
   const container=document.getElementById('tbodyHL');
   const labels=(window._configuredReqs&&window._configuredReqs.length)?window._configuredReqs:CRIT_LABELS;
-  const sorted = (window._sortKey==='match'||window._sortKey==='default')
+  const sorted = window._sortKey==='match'
     ? [...CANDS].sort((a,b)=> window._sortDir==='asc'
         ? calcAjuste(getEffectiveCriteria(a,labels),labels.length)-calcAjuste(getEffectiveCriteria(b,labels),labels.length)
         : calcAjuste(getEffectiveCriteria(b,labels),labels.length)-calcAjuste(getEffectiveCriteria(a,labels),labels.length))
@@ -2344,11 +2344,11 @@ function selectPage(el){
           <div class="sort-wrap" id="sortWrap">
             <button class="tbar-btn" id="btnSort" onclick="toggleSortDropdown(event)">
               <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M2 4h10M4 7h6M6 10h2" stroke-linecap="round"/></svg>
-              <span id="sortLabel">Ordenación InfoJobs</span>
+              <span id="sortLabel">Más recientes</span>
             </button>
             <div class="sort-dropdown" id="sortDropdown">
               <div class="sort-group-label">Por defecto</div>
-              <div class="sort-opt active" id="sortOptDefault" onclick="applySort('default','desc')">
+              <div class="sort-opt" id="sortOptDefault" onclick="applySort('default','desc')">
                 <span class="sort-opt-text">Ordenación InfoJobs:</span>
                 <span class="sort-opt-sub">Mayor nota + Mayor ajuste + Más reciente</span>
               </div>
@@ -2358,7 +2358,7 @@ function selectPage(el){
               <div class="sort-opt" onclick="applySort('match','asc')"><span class="sort-opt-text">Menor encaje</span></div>
               <div class="sort-divider"></div>
               <div class="sort-group-label">Fecha de inscripción</div>
-              <div class="sort-opt" onclick="applySort('cvTime','asc')"><span class="sort-opt-text">Más recientes</span></div>
+              <div class="sort-opt active" onclick="applySort('cvTime','asc')"><span class="sort-opt-text">Más recientes</span></div>
               <div class="sort-opt" onclick="applySort('cvTime','desc')"><span class="sort-opt-text">Menos recientes</span></div>
               <div class="sort-divider"></div>
               <div class="sort-group-label">Nombre</div>
