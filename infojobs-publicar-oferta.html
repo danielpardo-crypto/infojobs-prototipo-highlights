@@ -305,6 +305,13 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text','Helvetica Neue'
 .async-notif-table .async-notif-icon{color:#fff}
 .async-notif-table .async-reload-btn{background:#fff;color:#0B4DD0;border:none}
 .async-notif-table .async-reload-btn:hover{background:#EBF5FF}
+/* Toast flotante bottom-left */
+.async-notif-float{display:none;position:fixed;bottom:40px;left:40px;z-index:500;background:#0B4DD0;border-radius:8px;padding:12px 16px;align-items:center;gap:12px;max-width:460px;box-shadow:0 4px 24px rgba(0,0,0,.18)}
+.async-notif-float.show{display:flex}
+.async-notif-float .async-notif-text{color:#fff}
+.async-notif-float .async-notif-icon{color:#fff}
+.async-notif-float .async-reload-btn{background:#fff;color:#0B4DD0;border:none;flex-shrink:0}
+.async-notif-float .async-reload-btn:hover{background:#EBF5FF}
 
 .ins-tabs-bar{background:#F4F4F4;display:flex;gap:0;border-bottom:2px solid #EFEFF1;padding:24px 40px 0}
 .ins-tab{padding:10px 18px;font-size:14px;font-weight:500;color:#74727E;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;white-space:nowrap;user-select:none;transition:color .15s}
@@ -1980,6 +1987,7 @@ function goToInscritos(title,loc){
   document.getElementById('insMeta').textContent=(loc||'Madrid, Madrid')+' | 21 sep 2026 | Caduca en: 90 días';
   document.getElementById('prevaBanner').style.display='flex';
   document.getElementById('notifLoadingTable').classList.remove('show');
+  document.getElementById('notifLoadingFloat').classList.remove('show');
   document.getElementById('evalAjuste').style.display='none';
   document.getElementById('btnOcultarIA').style.display='none';
   renderNormalTable();
@@ -2100,10 +2108,12 @@ function finalizarHL(){
   document.getElementById('tableHL').style.display='block';
   document.getElementById('evalAjuste').style.display='block';
   document.getElementById('notifLoadingTable').classList.add('show');
+  document.getElementById('notifLoadingFloat').classList.add('show');
 }
 
 function recargarComparativas(){
   document.getElementById('notifLoadingTable').classList.remove('show');
+  document.getElementById('notifLoadingFloat').classList.remove('show');
   document.getElementById('btnOcultarIA').style.display='inline-flex';
   renderHLTable('loaded');
 }
@@ -2321,7 +2331,7 @@ function selectPage(el){
     <div class="ins-main">
       <div class="async-notif-table" id="notifLoadingTable">
         <span class="async-notif-icon">✨</span>
-        <div class="async-notif-text" style="font-size:13px;color:#003B7A"><strong>Las comparativas IA están siendo procesadas.</strong> Pulsa "Recargar página" cuando estén listas para verlas en el listado de candidatos.</div>
+        <div class="async-notif-text">Estamos comparando los CV con los requisitos del puesto. Haz clic en "Recargar página" para actualizar la lista.</div>
         <button class="async-reload-btn" onclick="recargarComparativas()">↻ Recargar página</button>
       </div>
       <div class="table-bar">
@@ -2459,6 +2469,13 @@ function selectPage(el){
       <button class="finalizar-btn" onclick="finalizarHL()">Confirmar</button>
     </div>
   </div>
+</div>
+
+<!-- Toast flotante bottom-left comparativas -->
+<div class="async-notif-float" id="notifLoadingFloat">
+  <span class="async-notif-icon">✨</span>
+  <div class="async-notif-text">Estamos comparando los CV con los requisitos del puesto. Haz clic en "Recargar página" para actualizar la lista.</div>
+  <button class="async-reload-btn" onclick="recargarComparativas()">↻ Recargar página</button>
 </div>
 </body>
 </html>
