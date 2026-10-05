@@ -290,6 +290,17 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text','Helvetica Neue'
 .preva-activate-btn{flex-shrink:0;display:inline-flex;align-items:center;gap:6px;padding:8px 18px;background:#0B4DD0;color:#fff;border:none;border-radius:20px;font-size:13px;font-weight:600;font-family:inherit;cursor:pointer;white-space:nowrap}
 .preva-activate-btn:hover{background:#0940B8}
 
+/* Notificación carga asíncrona comparativas */
+.async-notif{display:none;align-items:center;gap:12px;background:#EBF5FF;border-top:1px solid #90CAF9;border-bottom:1px solid #90CAF9;padding:14px 40px}
+.async-notif.show{display:flex}
+.async-notif-icon{font-size:20px;flex-shrink:0}
+.async-notif-text{flex:1;font-size:13px;color:#003B7A;line-height:20px}
+.async-notif-text strong{font-weight:600}
+.async-reload-btn{flex-shrink:0;display:inline-flex;align-items:center;gap:6px;padding:8px 18px;background:#0B4DD0;color:#fff;border:none;border-radius:20px;font-size:13px;font-weight:600;font-family:inherit;cursor:pointer;white-space:nowrap}
+.async-reload-btn:hover{background:#0940B8}
+.async-notif-table{display:none;background:#EBF5FF;border:1px solid #90CAF9;border-radius:8px;padding:12px 16px;align-items:center;gap:12px;margin-bottom:12px}
+.async-notif-table.show{display:flex}
+
 .ins-tabs-bar{background:#F4F4F4;display:flex;gap:0;border-bottom:2px solid #EFEFF1;padding:24px 40px 0}
 .ins-tab{padding:10px 18px;font-size:14px;font-weight:500;color:#74727E;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;white-space:nowrap;user-select:none;transition:color .15s}
 .ins-tab:hover{color:#2D3133}
@@ -1481,53 +1492,92 @@ function publish(){
   }, 200);
 }
 
+// ── LOCATION HELPERS ──
+// locGroup: 'match'=misma ciudad oferta | 'near'=municipio cercano misma provincia | 'other'=otra provincia
+// locKm: distancia numérica al centro (para ordenar y mostrar)
+// nearIdx: índice en la lista de municipios cercanos para esa provincia
+// otherIdx: índice en OTHER_CITIES si locGroup='other'
+const CITY_AREAS = {
+  'Madrid':     ['Alcobendas','Getafe','Alcalá de Henares','Leganés','Fuenlabrada','Móstoles','Pozuelo de Alarcón'],
+  'Barcelona':  ["L'Hospitalet",'Badalona','Cornellà de Llobregat','Terrassa','Sabadell','Sant Boi de Llobregat','Mataró'],
+  'Valencia':   ['Burjassot','Paterna','Torrent','Mislata','Alaquàs','Xirivella','Manises'],
+  'Sevilla':    ['Dos Hermanas','Alcalá de Guadaíra','Mairena del Aljarafe','Utrera','Camas','Bormujos','Tomares'],
+  'Zaragoza':   ['Utebo','Cuarte de Huerva','La Muela','Cadrete','Zuera','Pedrola','Épila'],
+  'Málaga':     ['Torremolinos','Fuengirola','Marbella','Vélez-Málaga','Mijas','Alhaurín de la Torre','Benalmádena'],
+  'Bilbao':     ['Barakaldo','Getxo','Basauri','Leioa','Santurtzi','Sestao','Algorta'],
+  'Alicante':   ['Elche','San Vicente del Raspeig','Petrer','Villena','Novelda','Monóvar','Elda'],
+  'Valladolid': ['Laguna de Duero','Arroyo de la Encomienda','Boecillo','Tudela de Duero','Cigales','Simancas','Medina del Campo'],
+};
+const OTHER_CITIES = [
+  ['Bilbao','Vizcaya'],['Zaragoza','Zaragoza'],['Málaga','Málaga'],['Murcia','Murcia'],
+  ['Palma','Islas Baleares'],['A Coruña','A Coruña'],['Valladolid','Valladolid'],['Alicante','Alicante'],
+];
+
+function getCandLoc(c){
+  const offerLoc = window._offerLoc || 'Madrid, Madrid';
+  const parts = offerLoc.split(',');
+  const offerCity = parts[0].trim();
+  const offerProv = (parts[1]||parts[0]).trim();
+  if(c.locGroup==='match'){
+    return { loc:`${offerCity}, ${offerProv}`, locSub:`(${c.locKm} km)` };
+  }
+  if(c.locGroup==='near'){
+    const nearList = CITY_AREAS[offerCity] || CITY_AREAS['Madrid'];
+    const nearCity = nearList[c.nearIdx % nearList.length];
+    return { loc:`${nearCity}, ${offerProv}`, locSub:`(${c.locKm} km)` };
+  }
+  // 'other'
+  const [oCity, oProv] = OTHER_CITIES[c.otherIdx % OTHER_CITIES.length];
+  return { loc:`${oCity}, ${oProv}`, locSub:`(+100 km)` };
+}
+
 // ── INSCRITOS DATA ──
-// cvTime: minutos desde inscripción (para ordenar). studiesRank: nivel académico (1=mínimo … 9=máximo). expYears: años numéricos. notaNum: puntuación numérica.
+// cvTime: minutos. studiesRank: 1-10. expYears: años. notaNum: puntuación. locGroup+locKm: ubicación dinámica.
 const CANDS=[
-  {name:'Manuel González',tags:['tag 1','tag 2','tag 3'],time:'hace 3 min',cvTime:3,loc:"L'Hospitalet, Barcelona",locSub:'(0 km)',studies:'Licenciatura',studiesRank:8,exp:'+7 años',expYears:7,nota:'28/30',notaNum:28,notaClass:'nota-verde',match:93,matchClass:'alto',
+  {name:'Manuel González',tags:['tag 1','tag 2','tag 3'],time:'hace 3 min',cvTime:3,locGroup:'match',locKm:0,nearIdx:0,otherIdx:0,studies:'Licenciatura',studiesRank:8,exp:'+7 años',expYears:7,nota:'28/30',notaNum:28,notaClass:'nota-verde',match:93,matchClass:'alto',
    summary:['+7 años de experiencia en el puesto','Titulación universitaria obtenida en 2008','Amplia experiencia en el área de conocimiento requerida'],
    criteria:[true,true,true,true,true,true,true]},
-  {name:'Laura Martínez',tags:['tag 1','tag 2','tag 3'],time:'hace 5 min',cvTime:5,loc:'Barcelona, Barcelona',locSub:'(2 km)',studies:'Máster',studiesRank:9,exp:'5 años',expYears:5,nota:'25/30',notaNum:25,notaClass:'nota-verde',match:85,matchClass:'alto',
+  {name:'Laura Martínez',tags:['tag 1','tag 2','tag 3'],time:'hace 5 min',cvTime:5,locGroup:'match',locKm:2,nearIdx:1,otherIdx:0,studies:'Máster',studiesRank:9,exp:'5 años',expYears:5,nota:'25/30',notaNum:25,notaClass:'nota-verde',match:85,matchClass:'alto',
    summary:['Experiencia de 5 años en puesto similar','Formación específica en el área requerida','Cursos de especialización recientes'],
    criteria:[true,true,null,true,true,true,true]},
-  {name:'Ricardo Fernández',tags:['tag 1','tag 2','tag 3'],time:'hace 8 min',cvTime:8,loc:'Badalona, Barcelona',locSub:'(8 km)',studies:'Grado',studiesRank:7,exp:'+3 años',expYears:3,nota:'22/30',notaNum:22,notaClass:'nota-amarilla',match:78,matchClass:'medio',
+  {name:'Ricardo Fernández',tags:['tag 1','tag 2','tag 3'],time:'hace 8 min',cvTime:8,locGroup:'near',locKm:8,nearIdx:0,otherIdx:0,studies:'Grado',studiesRank:7,exp:'+3 años',expYears:3,nota:'22/30',notaNum:22,notaClass:'nota-amarilla',match:78,matchClass:'medio',
    summary:['Formación en el área de la oferta','Experiencia en proyectos nacionales e internacionales','Conocimientos técnicos valorados'],
    criteria:[true,null,true,true,true,true,true]},
-  {name:'Sergio Pérez',tags:['tag 1','tag 2','tag 3'],time:'hace 12 min',cvTime:12,loc:'Cornellà, Barcelona',locSub:'(6 km)',studies:'FP Superior',studiesRank:6,exp:'4 años',expYears:4,nota:'18/30',notaNum:18,notaClass:'nota-amarilla',match:72,matchClass:'medio',
+  {name:'Sergio Pérez',tags:['tag 1','tag 2','tag 3'],time:'hace 12 min',cvTime:12,locGroup:'match',locKm:4,nearIdx:2,otherIdx:0,studies:'FP Superior',studiesRank:6,exp:'4 años',expYears:4,nota:'18/30',notaNum:18,notaClass:'nota-amarilla',match:72,matchClass:'medio',
    summary:['Profesional con 4 años de experiencia en el sector','Formación complementaria en el área','Disponibilidad inmediata'],
    criteria:[true,true,true,true,false,null,false]},
-  {name:'Marta Rodríguez',tags:['tag 1','tag 2','tag 3'],time:'hace 20 min',cvTime:20,loc:'Sant Boi, Barcelona',locSub:'(14 km)',studies:'Diplomatura',studiesRank:5,exp:'6 años',expYears:6,nota:'29/30',notaNum:29,notaClass:'nota-verde',match:66,matchClass:'medio',
+  {name:'Marta Rodríguez',tags:['tag 1','tag 2','tag 3'],time:'hace 20 min',cvTime:20,locGroup:'match',locKm:6,nearIdx:3,otherIdx:0,studies:'Diplomatura',studiesRank:5,exp:'6 años',expYears:6,nota:'29/30',notaNum:29,notaClass:'nota-verde',match:66,matchClass:'medio',
    summary:['Experiencia local, en proceso de ampliar a otros entornos','Reside cerca del puesto de trabajo','Buena capacidad de adaptación'],
    criteria:[true,true,null,false,null,true,true]},
-  {name:'Alejandro Sánchez',tags:['tag 1','tag 2','tag 3'],time:'hace 35 min',cvTime:35,loc:'Terrassa, Barcelona',locSub:'(28 km)',studies:'Bachillerato',studiesRank:4,exp:'2 años',expYears:2,nota:'15/30',notaNum:15,notaClass:'nota-roja',match:58,matchClass:'bajo',
+  {name:'Alejandro Sánchez',tags:['tag 1','tag 2','tag 3'],time:'hace 35 min',cvTime:35,locGroup:'near',locKm:15,nearIdx:1,otherIdx:0,studies:'Bachillerato',studiesRank:4,exp:'2 años',expYears:2,nota:'15/30',notaNum:15,notaClass:'nota-roja',match:58,matchClass:'bajo',
    summary:['3 años de experiencia en tareas relacionadas','Perfil en desarrollo, con interés en la especialización','Sin experiencia en algunos requisitos clave'],
    criteria:[true,true,null,null,false,false,false]},
-  {name:'Carmen López',tags:['tag 1','tag 2','tag 3'],time:'hace 1 h',cvTime:60,loc:'Sabadell, Barcelona',locSub:'(22 km)',studies:'FP Medio',studiesRank:3,exp:'1 año',expYears:1,nota:'20/30',notaNum:20,notaClass:'nota-amarilla',match:52,matchClass:'bajo',
+  {name:'Carmen López',tags:['tag 1','tag 2','tag 3'],time:'hace 1 h',cvTime:60,locGroup:'match',locKm:3,nearIdx:4,otherIdx:0,studies:'FP Medio',studiesRank:3,exp:'1 año',expYears:1,nota:'20/30',notaNum:20,notaClass:'nota-amarilla',match:52,matchClass:'bajo',
    summary:['Experiencia básica en el área','Estudios finalizados recientemente','Disponibilidad inmediata y actitud proactiva'],
    criteria:[false,true,null,null,false,null,true]},
-  {name:'David García',tags:['tag 1','tag 2','tag 3'],time:'hace 2 h',cvTime:120,loc:'Mataró, Barcelona',locSub:'(30 km)',studies:'Grado',studiesRank:7,exp:'+2 años',expYears:2,nota:'12/30',notaNum:12,notaClass:'nota-roja',match:44,matchClass:'bajo',
+  {name:'David García',tags:['tag 1','tag 2','tag 3'],time:'hace 2 h',cvTime:120,locGroup:'other',locKm:300,nearIdx:2,otherIdx:0,studies:'Grado',studiesRank:7,exp:'+2 años',expYears:2,nota:'12/30',notaNum:12,notaClass:'nota-roja',match:44,matchClass:'bajo',
    summary:['1 año de experiencia en el sector','Sin formación específica en algunos requisitos','Interés en seguir formándose'],
    criteria:[false,null,null,false,false,null,true]},
-  {name:'Isabel Fernández',tags:['tag 1','tag 2','tag 3'],time:'hace 3 h',cvTime:180,loc:'Viladecans, Barcelona',locSub:'(10 km)',studies:'Licenciatura',studiesRank:8,exp:'Sin experiencia',expYears:0,nota:'10/30',notaNum:10,notaClass:'nota-roja',match:38,matchClass:'bajo',
+  {name:'Isabel Fernández',tags:['tag 1','tag 2','tag 3'],time:'hace 3 h',cvTime:180,locGroup:'match',locKm:5,nearIdx:5,otherIdx:1,studies:'Licenciatura',studiesRank:8,exp:'Sin experiencia',expYears:0,nota:'10/30',notaNum:10,notaClass:'nota-roja',match:38,matchClass:'bajo',
    summary:['Perfil orientado a otras áreas, con interés en el cambio','Estudios universitarios en ADE','Disponible para jornada completa'],
    criteria:[false,null,null,null,false,null,false]},
-  {name:'Javier Torres',tags:['tag 1','tag 2','tag 3'],time:'hace 5 h',cvTime:300,loc:'Granollers, Barcelona',locSub:'(35 km)',studies:'ESO',studiesRank:2,exp:'Sin experiencia',expYears:0,nota:'8/30',notaNum:8,notaClass:'nota-roja',match:35,matchClass:'bajo',
-   summary:['Recién graduado con ganas de aprender','Sin experiencia profesional reseñable','Residente en Barcelona'],
+  {name:'Javier Torres',tags:['tag 1','tag 2','tag 3'],time:'hace 5 h',cvTime:300,locGroup:'near',locKm:22,nearIdx:2,otherIdx:1,studies:'ESO',studiesRank:2,exp:'Sin experiencia',expYears:0,nota:'8/30',notaNum:8,notaClass:'nota-roja',match:35,matchClass:'bajo',
+   summary:['Recién graduado con ganas de aprender','Sin experiencia profesional reseñable','Residente en la zona'],
    criteria:[false,null,null,null,null,false,true]},
-  {name:'Elena Ruiz',tags:['tag 1','tag 2','tag 3'],time:'hace 6 h',cvTime:360,loc:'El Prat, Barcelona',locSub:'(5 km)',studies:'Máster',studiesRank:9,exp:'+5 años',expYears:5,nota:'24/30',notaNum:24,notaClass:'nota-verde',match:62,matchClass:'medio',
+  {name:'Elena Ruiz',tags:['tag 1','tag 2','tag 3'],time:'hace 6 h',cvTime:360,locGroup:'match',locKm:1,nearIdx:6,otherIdx:2,studies:'Máster',studiesRank:9,exp:'+5 años',expYears:5,nota:'24/30',notaNum:24,notaClass:'nota-verde',match:62,matchClass:'medio',
    summary:['Profesional autónoma con 6 años de experiencia','Formación continua en el sector','Dispone de medios propios'],
    criteria:[true,true,true,null,true,true,false]},
-  {name:'Pablo Jiménez',tags:['tag 1','tag 2','tag 3'],time:'hace 8 h',cvTime:480,loc:'Mollet, Barcelona',locSub:'(18 km)',studies:'FP Superior',studiesRank:6,exp:'3 años',expYears:3,nota:'16/30',notaNum:16,notaClass:'nota-roja',match:55,matchClass:'bajo',
+  {name:'Pablo Jiménez',tags:['tag 1','tag 2','tag 3'],time:'hace 8 h',cvTime:480,locGroup:'other',locKm:250,nearIdx:3,otherIdx:1,studies:'FP Superior',studiesRank:6,exp:'3 años',expYears:3,nota:'16/30',notaNum:16,notaClass:'nota-roja',match:55,matchClass:'bajo',
    summary:['Experiencia en logística y operaciones','Perfil técnico con base sólida','Sin experiencia en algunas áreas específicas'],
    criteria:[true,false,null,false,null,true,true]},
-  {name:'Daniel Peris',tags:['tag 1','tag 2','tag 3'],time:'hace 10 h',cvTime:600,loc:"L'Hospitalet, Barcelona",locSub:'(0 km)',studies:'Diplomatura',studiesRank:5,exp:'+8 años',expYears:8,nota:'27/30',notaNum:27,notaClass:'nota-verde',match:80,matchClass:'alto',
+  {name:'Daniel Peris',tags:['tag 1','tag 2','tag 3'],time:'hace 10 h',cvTime:600,locGroup:'match',locKm:0,nearIdx:0,otherIdx:0,studies:'Diplomatura',studiesRank:5,exp:'+8 años',expYears:8,nota:'27/30',notaNum:27,notaClass:'nota-verde',match:80,matchClass:'alto',
    summary:['8 años de experiencia en el puesto','Certificaciones y formación vigentes','Conocimiento del entorno local y nacional'],
    criteria:[true,true,true,true,null,true,true]},
-  {name:'Ana Moreno',tags:['tag 1','tag 2','tag 3'],time:'hace 1 día',cvTime:1440,loc:'Gavà, Barcelona',locSub:'(12 km)',studies:'Bachillerato',studiesRank:4,exp:'1 año',expYears:1,nota:'14/30',notaNum:14,notaClass:'nota-roja',match:47,matchClass:'bajo',
+  {name:'Ana Moreno',tags:['tag 1','tag 2','tag 3'],time:'hace 1 día',cvTime:1440,locGroup:'match',locKm:7,nearIdx:4,otherIdx:2,studies:'Bachillerato',studiesRank:4,exp:'1 año',expYears:1,nota:'14/30',notaNum:14,notaClass:'nota-roja',match:47,matchClass:'bajo',
    summary:['Experiencia básica en el sector','Interés en obtener formación adicional','Sin experiencia en algunos requisitos clave'],
    criteria:[true,null,false,null,false,false,null]},
-  {name:'Antonia Carmona',tags:['tag 1','tag 2','tag 3'],time:'hace 2 días',cvTime:2880,loc:'Castelldefels, Barcelona',locSub:'(20 km)',studies:'Grado',studiesRank:7,exp:'5 años',expYears:5,nota:'21/30',notaNum:21,notaClass:'nota-amarilla',match:69,matchClass:'medio',
-   summary:['5 años de experiencia en el sector','Formación técnica actualizada','Reside a 10 km del puesto de trabajo'],
+  {name:'Antonia Carmona',tags:['tag 1','tag 2','tag 3'],time:'hace 2 días',cvTime:2880,locGroup:'match',locKm:10,nearIdx:5,otherIdx:3,studies:'Grado',studiesRank:7,exp:'5 años',expYears:5,nota:'21/30',notaNum:21,notaClass:'nota-amarilla',match:69,matchClass:'medio',
+   summary:['5 años de experiencia en el sector','Formación técnica actualizada','Reside cerca del puesto de trabajo'],
    criteria:[true,true,true,true,null,false,true]},
 ];
 
@@ -1561,7 +1611,9 @@ function getSortedCands(){
   if(key==='default') return [...CANDS].sort((a,b)=>b.match-a.match);
   return [...CANDS].sort((a,b)=>{
     let va, vb;
-    if(key==='name'||key==='loc'){ va=a[key]||''; vb=b[key]||''; return dir==='asc'?va.localeCompare(vb):vb.localeCompare(va); }
+    if(key==='name'){ va=a.name||''; vb=b.name||''; return dir==='asc'?va.localeCompare(vb):vb.localeCompare(va); }
+    if(key==='loc'){ va=getCandLoc(a).loc||''; vb=getCandLoc(b).loc||''; return dir==='asc'?va.localeCompare(vb):vb.localeCompare(va); }
+    if(key==='locDistance'){ va=a.locKm??0; vb=b.locKm??0; return dir==='desc'?vb-va:va-vb; }
     va=a[key]??0; vb=b[key]??0;
     return dir==='desc' ? vb-va : va-vb;
   });
@@ -1579,8 +1631,8 @@ function resortHLDom(){
   const labels=(window._configuredReqs&&window._configuredReqs.length)?window._configuredReqs:CRIT_LABELS;
   const sorted=(window._sortKey==='match'||window._sortKey==='default')
     ? [...CANDS].sort((a,b)=> window._sortDir==='asc'
-        ? calcAjuste(a.criteria,labels.length)-calcAjuste(b.criteria,labels.length)
-        : calcAjuste(b.criteria,labels.length)-calcAjuste(a.criteria,labels.length))
+        ? calcAjuste(getEffectiveCriteria(a,labels),labels.length)-calcAjuste(getEffectiveCriteria(b,labels),labels.length)
+        : calcAjuste(getEffectiveCriteria(b,labels),labels.length)-calcAjuste(getEffectiveCriteria(a,labels),labels.length))
     : getSortedCands();
   const nameToCard={};
   cards.forEach(card=>{ nameToCard[card.dataset.candName]=card; });
@@ -1601,7 +1653,7 @@ function applySort(key, dir){
   const skelVisible=document.getElementById('tableSkeleton').style.display!=='none';
   // If HL table is visible and all comparativas are loaded → only re-sort DOM, don't re-render
   if(hlVisible && window._hlAllLoaded){ resortHLDom(); return; }
-  if(hlVisible) renderHLTable();
+  if(hlVisible){ const pending=document.getElementById('notifLoadingTop').classList.contains('show'); renderHLTable(!pending); }
   else if(skelVisible) renderSkeletonTable();
   else renderNormalTable();
 }
@@ -1621,7 +1673,7 @@ function renderNormalTable(){
           <div class="cand-tag-row">${c.tags.map(t=>`<span class="cand-tag-chip">${t}</span>`).join('')}</div>
         </div>
         <div class="cand-time">${c.time}</div>
-        <div><div class="cand-loc-main">${c.loc}</div><div class="cand-loc-sub">${c.locSub}</div></div>
+        <div><div class="cand-loc-main">\${getCandLoc(c).loc}</div><div class="cand-loc-sub">\${getCandLoc(c).locSub}</div></div>
         <div>${c.studies}</div>
         <div>${c.exp}</div>
         <div><span class="nota-badge ${c.notaClass}">Nota: ${c.nota}</span></div>
@@ -1641,7 +1693,7 @@ function renderSkeletonTable(){
           <div class="cand-tag-row">${c.tags.map(t=>`<span class="cand-tag-chip">${t}</span>`).join('')}</div>
         </div>
         <div class="cand-time">${c.time}</div>
-        <div><div class="cand-loc-main">${c.loc}</div><div class="cand-loc-sub">${c.locSub}</div></div>
+        <div><div class="cand-loc-main">\${getCandLoc(c).loc}</div><div class="cand-loc-sub">\${getCandLoc(c).locSub}</div></div>
         <div>${c.studies}</div>
         <div>${c.exp}</div>
         <div><span class="nota-badge ${c.notaClass}">Nota: ${c.nota}</span></div>
@@ -1690,12 +1742,70 @@ function makeRing(pct, color){
 }
 
 function guaranteeAllLevels(sorted, labels){
-  const getLevel = c => { const p=calcAjuste(c.criteria,labels.length); return p>=85?0:p>=70?1:p>=50?2:3; };
+  const getLevel = c => { const p=calcAjuste(getEffectiveCriteria(c,labels),labels.length); return p>=85?0:p>=70?1:p>=50?2:3; };
   const pinned=[], seenLvl=new Set();
   for(const c of sorted){ const l=getLevel(c); if(!seenLvl.has(l)){pinned.push(c);seenLvl.add(l);} if(seenLvl.size===4) break; }
   pinned.sort((a,b)=>getLevel(a)-getLevel(b));
   const pinnedSet=new Set(pinned);
   return [...pinned, ...sorted.filter(c=>!pinnedSet.has(c))];
+}
+
+// ── DYNAMIC CRITERIA EVALUATION ──
+const STUDIES_RANK_MAP = {
+  'sin estudios':1,'certificado':2,'escolaridad':2,
+  'eso':3,'secundaria':3,'graduado escolar':3,
+  'bachillerato':4,'bachiller':4,'cou':4,
+  'fp medio':5,'ciclo medio':5,'grado medio':5,'fp':5,
+  'fp superior':6,'ciclo superior':6,'grado superior':6,'diplomatura':6,
+  'grado':7,'ingeniería técnica':7,'arquitectura técnica':7,
+  'licenciatura':8,'ingeniería':8,'arquitectura':8,'universitarios':8,
+  'máster':9,'master':9,'mba':9,'postgrado':9,'posgrado':9,
+  'doctorado':10,'phd':10,
+};
+
+function studiesLabelToRank(text){
+  const t=text.toLowerCase();
+  for(const [k,v] of Object.entries(STUDIES_RANK_MAP)){ if(t.includes(k)) return v; }
+  return 0;
+}
+
+// Returns true/false/null for a single criterion, using real candidate data when derivable.
+function getCritValue(label, c, staticVal){
+  const lbl=label.toLowerCase();
+  const afterColon=label.includes(':') ? label.slice(label.indexOf(':')+1).trim() : '';
+
+  // ── Ubicación / Población ──
+  if(lbl.includes('ubicaci') || lbl.includes('poblaci') || lbl.includes('provincia') || lbl.includes('ciudad')){
+    if(!afterColon) return staticVal;
+    const reqCity=afterColon.toLowerCase().split(',')[0].trim();
+    const candCity=getCandLoc(c).loc.toLowerCase().split(',')[0].trim();
+    return candCity.includes(reqCity) || reqCity.includes(candCity);
+  }
+
+  // ── Estudios mínimos ──
+  if(lbl.includes('estudio') || lbl.includes('formaci') || lbl.includes('titulaci') || lbl.includes('titulación')){
+    if(!afterColon) return staticVal;
+    const reqRank=studiesLabelToRank(afterColon);
+    if(reqRank>0) return c.studiesRank >= reqRank;
+    return staticVal;
+  }
+
+  // ── Experiencia en el puesto ──
+  if(lbl.includes('experiencia')){
+    const m=lbl.match(/(\d+)\s*año/);
+    if(m){ const reqYears=parseInt(m[1]); return c.expYears >= reqYears; }
+    return staticVal;
+  }
+
+  return staticVal;
+}
+
+// Returns the full evaluated criteria array for a candidate given current labels.
+function getEffectiveCriteria(c, labels){
+  return labels.map((lbl,i)=>{
+    const raw=c.criteria[i]!==undefined ? c.criteria[i] : null;
+    return getCritValue(lbl, c, raw);
+  });
 }
 
 function critIcon(val){
@@ -1720,9 +1830,9 @@ function calcAjuste(criteria, numLabels){
 
 function makeHLEvalHTML(c, labels){
   const half=Math.ceil(labels.length/2);
-  const match=calcAjuste(c.criteria,labels.length);
+  const crit=getEffectiveCriteria(c, labels);
+  const match=calcAjuste(crit, labels.length);
   const em=encajeMeta(match);
-  const crit=labels.map((_,i)=>c.criteria[i]!==undefined?c.criteria[i]:null);
   const col2=labels.slice(0,half).map((lbl,i)=>renderCritItem(lbl,crit[i])).join('');
   const col3=labels.slice(half).map((lbl,i)=>renderCritItem(lbl,crit[half+i])).join('');
   return `<div style="background:#F7F7F9;border-radius:24px;padding:36px 16px 14px 16px;display:flex;gap:0;align-items:flex-start;position:relative">
@@ -1802,17 +1912,18 @@ function startHLSequentialLoad(sorted, labels){
   window._hlLoadTimer = setInterval(revealNext, 2000);
 }
 
-function renderHLTable(){
+function renderHLTable(withEval=true){
   const container=document.getElementById('tbodyHL');
   const labels=(window._configuredReqs&&window._configuredReqs.length)?window._configuredReqs:CRIT_LABELS;
   const sorted = (window._sortKey==='match'||window._sortKey==='default')
     ? [...CANDS].sort((a,b)=> window._sortDir==='asc'
-        ? calcAjuste(a.criteria,labels.length)-calcAjuste(b.criteria,labels.length)
-        : calcAjuste(b.criteria,labels.length)-calcAjuste(a.criteria,labels.length))
+        ? calcAjuste(getEffectiveCriteria(a,labels),labels.length)-calcAjuste(getEffectiveCriteria(b,labels),labels.length)
+        : calcAjuste(getEffectiveCriteria(b,labels),labels.length)-calcAjuste(getEffectiveCriteria(a,labels),labels.length))
     : getSortedCands();
 
   container.innerHTML=sorted.map(c=>{
-    const match=calcAjuste(c.criteria,labels.length);
+    const effCrit=getEffectiveCriteria(c,labels);
+    const match=calcAjuste(effCrit,labels.length);
     const em=encajeMeta(match);
     return `
     <div class="hl-cand-card" data-cand-name="${c.name.replace(/"/g,'&quot;')}">
@@ -1829,16 +1940,16 @@ function renderHLTable(){
           </div>
         </div>
         <div class="cand-time">${c.time}</div>
-        <div><div class="cand-loc-main">${c.loc}</div><div class="cand-loc-sub">${c.locSub}</div></div>
+        <div><div class="cand-loc-main">\${getCandLoc(c).loc}</div><div class="cand-loc-sub">\${getCandLoc(c).locSub}</div></div>
         <div>${c.studies}</div>
         <div>${c.exp}</div>
         <div><span class="nota-badge ${c.notaClass}">Nota: ${c.nota}</span></div>
       </div>
-      <div class="hl-eval-section" style="transition:opacity .4s ease">${makeHLSkelHTML()}</div>
+      ${withEval ? `<div class="hl-eval-section" style="transition:opacity .4s ease">${makeHLSkelHTML()}</div>` : ''}
     </div>`;
   }).join('');
 
-  startHLSequentialLoad(sorted, labels);
+  if(withEval) startHLSequentialLoad(sorted, labels);
 }
 
 function goToInscritos(title,loc){
@@ -1850,6 +1961,8 @@ function goToInscritos(title,loc){
   h1.childNodes[0].textContent=(title||'Desarrollador/a Full Stack')+' ';
   document.getElementById('insMeta').textContent=(loc||'Madrid, Madrid')+' | 21 sep 2026 | Caduca en: 90 días';
   document.getElementById('prevaBanner').style.display='flex';
+  document.getElementById('notifLoadingTop').classList.remove('show');
+  document.getElementById('notifLoadingTable').classList.remove('show');
   document.getElementById('evalAjuste').style.display='none';
   document.getElementById('btnOcultarIA').style.display='none';
   renderNormalTable();
@@ -1964,16 +2077,22 @@ function finalizarHL(){
   document.getElementById('hlModal').classList.add('hidden');
   document.getElementById('prevaBanner').style.display='none';
   document.getElementById('tableNormal').style.display='none';
-  document.getElementById('tableHL').style.display='none';
-  renderSkeletonTable();
-  document.getElementById('tableSkeleton').style.display='block';
+  document.getElementById('tableSkeleton').style.display='none';
+  // Mostrar tabla HL sin comparativas hasta que el usuario pulse "Recargar"
+  renderHLTable(false);
+  document.getElementById('tableHL').style.display='block';
+  document.getElementById('evalAjuste').style.display='block';
+  // Mostrar las dos notificaciones de carga asíncrona
+  document.getElementById('notifLoadingTop').classList.add('show');
+  document.getElementById('notifLoadingTable').classList.add('show');
+}
+
+function recargarComparativas(){
+  document.getElementById('notifLoadingTop').classList.remove('show');
+  document.getElementById('notifLoadingTable').classList.remove('show');
   document.getElementById('btnOcultarIA').style.display='inline-flex';
-  setTimeout(()=>{
-    document.getElementById('tableSkeleton').style.display='none';
-    renderHLTable();
-    document.getElementById('tableHL').style.display='block';
-    document.getElementById('evalAjuste').style.display='block';
-  },3000);
+  // Re-render con las secciones de evaluación y arrancar la carga secuencial
+  renderHLTable(true);
 }
 
 function selSource(btn){
@@ -2093,6 +2212,11 @@ function selectPage(el){
       <div class="preva-banner-text">Activa <strong>PreViA</strong>, el asistente IA de InfoJobs que evaluará aquellas candidaturas que mejor encajen con tu oferta para agilizar el proceso de selección. <a onclick="return false">Tú decides siempre quién pasa al siguiente paso del proceso.</a></div>
       <button class="preva-activate-btn" onclick="openHLModal()">✨ Activar evaluación PreViA</button>
     </div>
+    <div class="async-notif" id="notifLoadingTop">
+      <span class="async-notif-icon">✨</span>
+      <div class="async-notif-text"><strong>Comparativas en proceso</strong> — La IA está analizando los CVs de los candidatos según los requisitos de tu oferta. Cuando el análisis esté listo, recarga la página para ver las comparativas en el listado.</div>
+      <button class="async-reload-btn" onclick="recargarComparativas()">↻ Recargar página</button>
+    </div>
     <div class="ins-tabs-bar">
       <div class="ins-tab active" onclick="selInsTab(this)">Sin valorar (15)</div>
       <div class="ins-tab" onclick="selInsTab(this)">Preseleccionados (0)</div>
@@ -2187,6 +2311,11 @@ function selectPage(el){
     </div>
 
     <div class="ins-main">
+      <div class="async-notif-table" id="notifLoadingTable">
+        <span class="async-notif-icon">✨</span>
+        <div class="async-notif-text" style="font-size:13px;color:#003B7A"><strong>Las comparativas IA están siendo procesadas.</strong> Pulsa "Recargar página" cuando estén listas para verlas en el listado de candidatos.</div>
+        <button class="async-reload-btn" onclick="recargarComparativas()">↻ Recargar página</button>
+      </div>
       <div class="table-bar">
         <div class="table-bar-left">
           <span class="cvs-count">CVs: 15 de 15</span>
