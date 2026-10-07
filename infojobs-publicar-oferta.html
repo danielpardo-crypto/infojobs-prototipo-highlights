@@ -1667,7 +1667,7 @@ function applySort(key, dir){
   const skelVisible=document.getElementById('tableSkeleton').style.display!=='none';
   // If HL table is visible and all comparativas are loaded → only re-sort DOM, don't re-render
   if(hlVisible && window._hlAllLoaded){ resortHLDom(); return; }
-  if(hlVisible){ const loading=document.getElementById('notifLoadingTable').classList.contains('show'); renderHLTable(loading?'loading':'loaded'); }
+  if(hlVisible){ const loading=document.getElementById('notifLoadingFloat').classList.contains('show'); renderHLTable(loading?'loading':'loaded'); }
   else if(skelVisible) renderSkeletonTable();
   else renderNormalTable();
 }
@@ -1928,7 +1928,6 @@ function startHLSequentialLoad(sorted, labels){
 
 function makeHLLoadingHTML(){
   return `<div style="background:#F7F7F9;border-radius:10px;padding:14px 16px;display:flex;align-items:center;gap:10px">
-    <span class="spin"><img src="assets/icon-loading.svg" width="18" height="18" alt="cargando" style="display:block"></span>
     <span style="font-size:13px;color:#74727E">Calculando comparativa...</span>
   </div>`;
 }
@@ -1986,7 +1985,6 @@ function goToInscritos(title,loc){
   h1.childNodes[0].textContent=(title||'Desarrollador/a Full Stack')+' ';
   document.getElementById('insMeta').textContent=(loc||'Madrid, Madrid')+' | 21 sep 2026 | Caduca en: 90 días';
   document.getElementById('prevaBanner').style.display='flex';
-  document.getElementById('notifLoadingTable').classList.remove('show');
   document.getElementById('notifLoadingFloat').classList.remove('show');
   document.getElementById('evalAjuste').style.display='none';
   document.getElementById('btnOcultarIA').style.display='none';
@@ -2107,12 +2105,10 @@ function finalizarHL(){
   renderHLTable('loading');
   document.getElementById('tableHL').style.display='block';
   document.getElementById('evalAjuste').style.display='block';
-  document.getElementById('notifLoadingTable').classList.add('show');
   document.getElementById('notifLoadingFloat').classList.add('show');
 }
 
 function recargarComparativas(){
-  document.getElementById('notifLoadingTable').classList.remove('show');
   document.getElementById('notifLoadingFloat').classList.remove('show');
   document.getElementById('btnOcultarIA').style.display='inline-flex';
   renderHLTable('loaded');
@@ -2329,11 +2325,6 @@ function selectPage(el){
     </div>
 
     <div class="ins-main">
-      <div class="async-notif-table" id="notifLoadingTable">
-        <span class="async-notif-icon">✨</span>
-        <div class="async-notif-text">Estamos comparando los CV con los requisitos del puesto. Haz clic en "Recargar página" para actualizar la lista.</div>
-        <button class="async-reload-btn" onclick="recargarComparativas()">↻ Recargar página</button>
-      </div>
       <div class="table-bar">
         <div class="table-bar-left">
           <span class="cvs-count">CVs: 15 de 15</span>
