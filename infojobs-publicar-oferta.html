@@ -2130,7 +2130,7 @@ function finalizarHL(){
 
 function recargarComparativas(){
   const elapsed = window._hlBgStartTime ? (Date.now() - window._hlBgStartTime) / 1000 : 0;
-  const toShow  = Math.floor(elapsed / 6);
+  const toShow  = Math.floor(elapsed / 3);
   const total   = CANDS.length;
   window._hlRevealedCount = Math.min(toShow, total);
 
@@ -2187,7 +2187,7 @@ function selInsTab(el){
   if(hlMode && window._hlBgStartTime && !window._hlAllLoaded){
     // Re-evaluate how many comparativas are ready now
     const elapsed = (Date.now() - window._hlBgStartTime) / 1000;
-    const toShow  = Math.floor(elapsed / 6);
+    const toShow  = Math.floor(elapsed / 3);
     const total   = CANDS.length;
 
     if(toShow >= total){
