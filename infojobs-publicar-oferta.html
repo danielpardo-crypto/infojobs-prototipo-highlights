@@ -1667,7 +1667,10 @@ function applySort(key, dir){
   const skelVisible=document.getElementById('tableSkeleton').style.display!=='none';
   // If HL table is visible and all comparativas are loaded → only re-sort DOM, don't re-render
   if(hlVisible && window._hlAllLoaded){ resortHLDom(); return; }
-  if(hlVisible){ const loading=document.getElementById('notifLoadingFloat').classList.contains('show'); renderHLTable(loading?'loading':'loaded'); }
+  if(hlVisible){
+    if(window._hlRevealedCount > 0 && !window._hlAllLoaded){ renderHLTable('partial', window._hlRevealedCount); }
+    else{ renderHLTable(window._hlRevealedCount === 0 ? 'loading' : 'loaded'); }
+  }
   else if(skelVisible) renderSkeletonTable();
   else renderNormalTable();
 }
@@ -1890,10 +1893,12 @@ function makeHLSkelHTML(){
 }
 
 // Sequential HL loader state
-window._hlLoadTimer = null;
-window._hlLoadIdx   = 0;
-window._hlSorted    = [];
-window._hlAllLoaded = false;
+window._hlLoadTimer    = null;
+window._hlLoadIdx      = 0;
+window._hlSorted       = [];
+window._hlAllLoaded    = false;
+window._hlBgStartTime  = null;  // timestamp when background counter starts (finalizarHL)
+window._hlRevealedCount = 0;    // comparativas revealed so far via recargar
 
 function startHLSequentialLoad(sorted, labels){
   if(window._hlLoadTimer) clearInterval(window._hlLoadTimer);
@@ -1932,7 +1937,7 @@ function makeHLLoadingHTML(){
   </div>`;
 }
 
-function renderHLTable(mode='loaded'){
+function renderHLTable(mode='loaded', revealCount=null){
   const container=document.getElementById('tbodyHL');
   const labels=(window._configuredReqs&&window._configuredReqs.length)?window._configuredReqs:CRIT_LABELS;
   const sorted = window._sortKey==='match'
@@ -1941,10 +1946,12 @@ function renderHLTable(mode='loaded'){
         : calcAjuste(getEffectiveCriteria(b,labels),labels.length)-calcAjuste(getEffectiveCriteria(a,labels),labels.length))
     : getSortedCands();
 
-  container.innerHTML=sorted.map(c=>{
+  container.innerHTML=sorted.map((c,i)=>{
     const effCrit=getEffectiveCriteria(c,labels);
     const match=calcAjuste(effCrit,labels.length);
     const em=encajeMeta(match);
+    // 'partial': first revealCount cards are loaded, the rest stay as loading
+    const cardMode = mode==='partial' ? (i < revealCount ? 'loaded' : 'loading') : mode;
     return `
     <div class="hl-cand-card" data-cand-name="${c.name.replace(/"/g,'&quot;')}">
       <div class="hl-cand-row">
@@ -1965,14 +1972,19 @@ function renderHLTable(mode='loaded'){
         <div>${c.exp}</div>
         <div><span class="nota-badge ${c.notaClass}">Nota: ${c.nota}</span></div>
       </div>
-      ${mode === 'loading' ? `<div class="hl-eval-section">${makeHLLoadingHTML()}</div>` : ''}
-      ${mode === 'loaded'  ? `<div class="hl-eval-section">${makeHLEvalHTML(c, labels)}</div>` : ''}
+      ${cardMode === 'loading' ? `<div class="hl-eval-section">${makeHLLoadingHTML()}</div>` : ''}
+      ${cardMode === 'loaded'  ? `<div class="hl-eval-section">${makeHLEvalHTML(c, labels)}</div>` : ''}
     </div>`;
   }).join('');
 
   if(mode === 'loaded'){
     window._hlAllLoaded = true;
     window._hlLoadIdx = sorted.length;
+  } else if(mode === 'partial'){
+    window._hlLoadIdx = revealCount;
+    if(revealCount >= sorted.length){
+      window._hlAllLoaded = true;
+    }
   }
 }
 
@@ -1986,6 +1998,8 @@ function goToInscritos(title,loc){
   document.getElementById('insMeta').textContent=(loc||'Madrid, Madrid')+' | 21 sep 2026 | Caduca en: 90 días';
   document.getElementById('prevaBanner').style.display='flex';
   document.getElementById('notifLoadingFloat').classList.remove('show');
+  window._hlBgStartTime   = null;
+  window._hlRevealedCount = 0;
   document.getElementById('evalAjuste').style.display='none';
   document.getElementById('btnOcultarIA').style.display='none';
   renderNormalTable();
@@ -2101,7 +2115,9 @@ function finalizarHL(){
   document.getElementById('prevaBanner').style.display='none';
   document.getElementById('tableNormal').style.display='none';
   document.getElementById('tableSkeleton').style.display='none';
-  window._hlAllLoaded = false;
+  window._hlAllLoaded    = false;
+  window._hlRevealedCount = 0;
+  window._hlBgStartTime  = Date.now();  // start background counter
   renderHLTable('loading');
   document.getElementById('tableHL').style.display='block';
   document.getElementById('evalAjuste').style.display='block';
@@ -2109,9 +2125,21 @@ function finalizarHL(){
 }
 
 function recargarComparativas(){
-  document.getElementById('notifLoadingFloat').classList.remove('show');
-  document.getElementById('btnOcultarIA').style.display='inline-flex';
-  renderHLTable('loaded');
+  const elapsed = window._hlBgStartTime ? (Date.now() - window._hlBgStartTime) / 1000 : 0;
+  const toShow  = Math.floor(elapsed / 6);
+  const total   = CANDS.length;
+  window._hlRevealedCount = Math.min(toShow, total);
+
+  if(toShow >= total){
+    // All comparativas ready: hide notification and show everything
+    document.getElementById('notifLoadingFloat').classList.remove('show');
+    document.getElementById('btnOcultarIA').style.display='inline-flex';
+    renderHLTable('loaded');
+  } else {
+    // Partial reveal: show toShow cards, keep the rest as loading
+    renderHLTable('partial', toShow);
+    // Notification stays visible so the user can reload again later
+  }
 }
 
 function selSource(btn){
