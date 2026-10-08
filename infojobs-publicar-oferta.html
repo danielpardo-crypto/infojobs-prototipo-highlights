@@ -2200,10 +2200,9 @@ function selInsTab(el){
       // More are ready than before — partial update
       window._hlRevealedCount = toShow;
       renderHLTable('partial', toShow);
-    } else {
-      // Nothing new yet — just restore the table as-is
-      document.getElementById('tableHL').style.display = 'block';
     }
+    // renderHLTable only fills tbodyHL — always make the wrapper visible
+    document.getElementById('tableHL').style.display = 'block';
   } else if(hlMode){
     document.getElementById('tableHL').style.display = 'block';
   } else {
